@@ -55,18 +55,30 @@ class GroupsCommand extends Command{
                         });
                         $player->sendForm($form);
                         break;
-
-
+                    case "Supprimer l'équipe":
+                        PlayerUtils::sendVerification($player, function (PolarisPlayer $player) use ($team) {
+                            $team->delete();
+                        }, " de vouloir supprimer l'équipe");
+                        break;
+                    case "Quitter l'équipe":
+                        PlayerUtils::sendVerification($player, function (PolarisPlayer $player) use ($team) {
+                            $team->kick($player);
+                        }, " de vouloir quitter l'équipe");
+                        break;
+                    case "Envoyer un message":
+                        $form = new CustomForm("§l§aEnvoyer un message",[new Input("Message", "")], function (PolarisPlayer $player, CustomFormResponse $response) use ($team) {
+                            $value = $response->getInput()->getValue();
+                            $team->sendMessage($value, $player->getName());
+                        });
+                        $player->sendForm($form);
+                        break;
                 }
             });
             if($team->isOwner($player)){
-                $option = ["Invitez un membre", "Expulser un membre", "Modifier le nom de l'équipe", "Supprimer l'équipe"];
-
-
+                $form->appendOptions("Invitez un membre", "Expulser un membre", "Modifier le nom de l'équipe", "Supprimer l'équipe");
             }
         }else{
-
+            $player->sendMessage("Vous n'avez pas d'équipe");
         }
-
     }
 }

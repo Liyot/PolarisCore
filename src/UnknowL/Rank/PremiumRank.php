@@ -20,4 +20,9 @@ class PremiumRank extends Rank
     {
         return 2;
     }
+
+    public function getRecompense()
+    {
+        // TODO: Implement getRecompense() method.
+    }
 }

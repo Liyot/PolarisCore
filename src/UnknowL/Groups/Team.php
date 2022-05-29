@@ -4,6 +4,7 @@ namespace UnknowL\Groups;
 
 
 use UnknowL\Player\PolarisPlayer;
+use UnknowL\Utils\ChatUtils;
 
 class Team{
 
@@ -30,7 +31,7 @@ class Team{
 
     public function setInGame(){}
 
-    public function sendMessage(string $message): void
+    public function sendMessage(string $message, string $from): void
     {
         foreach($this->members as $member){
             $member->sendMessage($message);
@@ -44,8 +45,31 @@ class Team{
 
     public function setName(string $name): void
     {
-
+        if(ChatUtils::containBadWord($name)){
+            $this->owner->sendMessage("§cLe nom de votre team ne peut pas contenir de mots interdits");
+            return;
+        }
         $this->name = $name;
+    }
+
+    public function delete(): void
+    {
+        $this->sendMessage("§cVotre team a été supprimée");
+
+        foreach($this->members as $member){
+            $member->setTeam(null);
+        }
+        $this->members = [];
+    }
+
+    public function leave(PolarisPlayer $player){
+        if(!$this->isMember($player)){
+            return;
+        }
+        $this->sendMessage("§c{$player->getName()} a quitté votre équipe");
+        $player->getTeamManager()->setTeam(null);
+        $player->sendMessage("§cVous avez quitté votre équipe");
+        $this->removeMember($player);
     }
 
     public function kick(PolarisPlayer $player): void

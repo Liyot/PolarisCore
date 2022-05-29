@@ -2,6 +2,10 @@
 
 namespace PolarisCore\Rank;
 
-class Rank{
+abstract class Rank{
+
+    abstract public function getName();
+
+    abstract function getRecompense();
 
 }

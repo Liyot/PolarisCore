@@ -50,7 +50,10 @@ class TeamManager{
     public function sendInvite(PolarisPlayer $from, Team $team): void{
         if(!$this->hasTeam()){
             if(!$team->isFull()){
-                $this->player->sendMessage("Vous avez été invités à rejoindre l'équipe {$team->getName()}");
+                $this->player->sendMessage("Vous avez été invités à rejoindre l'équipe {$team->getName()} de la part de {$from->getName()}");
+                PlayerUtils::sendVerification($this->player, function (PolarisPlayer $player) use ($team) {
+                    $this->addPlayerToTeam($team);
+                }, "de vouloir rejoindre cette équipe");
                 $this->addPlayerToTeam($team);
             }
         }
