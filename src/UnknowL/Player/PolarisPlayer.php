@@ -17,19 +17,20 @@ class PolarisPlayer extends Player{
 
     public function initEntity(CompoundTag $nbt): void
     {
-
+        $this->rank = new PremiumRank();
         parent::initEntity($nbt);
         $this->teamManager = new TeamManager($this);
     }
 
     public function addResquest(string $name, mixed $value = null): void
     {
-        $this->request[$name] = $value;
+        $this->request[$name][] = $value;
     }
+
 
     public function getRequest(string $name): mixed
     {
-        return $this->request[$name];
+        return $this->request[$name] ?? null;
     }
 
     public function isPremium(): bool

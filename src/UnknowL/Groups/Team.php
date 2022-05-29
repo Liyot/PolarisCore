@@ -17,14 +17,14 @@ class Team{
 
     private bool $premium;
 
-    private PolarisPlayer $owner;
+    private PolarisPlayer|null $owner;
 
-    private int $maxMembers = 0;
+    private int $maxMembers;
 
-    public function __construct( PolarisPlayer $owner){
+    public function __construct( PolarisPlayer $owner, string $name = null){
         $this->owner = $owner;
         $this->addMember($owner);
-        $this->name = $this->owner->getName()." Team";
+        $this->name = is_null($name) ? $this->owner->getName()." Team" : $name;
         $this->premium = $this->owner->isPremium();
         $this->maxMembers = $this->isPremium()? 8 : 4;
     }
@@ -46,7 +46,7 @@ class Team{
     public function setName(string $name): void
     {
         if(ChatUtils::containBadWord($name)){
-            $this->owner->sendMessage("§cLe nom de votre team ne peut pas contenir de mots interdits");
+            $this->owner->sendMessage("§cLe nom de votre équipe ne peut pas contenir de mots interdits");
             return;
         }
         $this->name = $name;
@@ -54,11 +54,12 @@ class Team{
 
     public function delete(): void
     {
-        $this->sendMessage("§cVotre team a été supprimée");
+        $this->sendMessage("§cVotre équipe a été supprimée", $this->owner);
 
         foreach($this->members as $member){
-            $member->setTeam(null);
+            $member->getTeamManager()->setTeam(null);
         }
+        $this->owner = null;
         $this->members = [];
     }
 
@@ -66,10 +67,16 @@ class Team{
         if(!$this->isMember($player)){
             return;
         }
-        $this->sendMessage("§c{$player->getName()} a quitté votre équipe");
+
         $player->getTeamManager()->setTeam(null);
         $player->sendMessage("§cVous avez quitté votre équipe");
         $this->removeMember($player);
+
+        $this->sendMessage("§c{$player->getName()} a quitté votre équipe", $player);
+
+        if(count($this->members) === 0){
+            $this->delete();
+        }
     }
 
     public function kick(PolarisPlayer $player): void
@@ -88,12 +95,10 @@ class Team{
 
     public function setPremium(bool $premium): void
     {
-        foreach ($this->members as $member){
-            if($member->isPremium()){
-                $this->premium = true;
-            }else{
-                $this->sendMessage("Vous ne pouvez pas mettre votre équipe en premium car certains membre ne sont pas premium");
-            }
+        if($this->getOwner()->isPremium()){
+            $this->premium = true;
+        }else{
+            $this->owner->sendMessage("Vous ne pouvez pas mettre votre équipe car vous n'êtes pas premium");
         }
         $this->premium = $premium;
     }
@@ -102,8 +107,6 @@ class Team{
     {
         return $this->premium;
     }
-
-
 
     public function getOwner(): PolarisPlayer
     {
@@ -125,6 +128,11 @@ class Team{
         return $this->name;
     }
 
+    public function getMaxMembers(): int
+    {
+        return $this->maxMembers;
+    }
+
     public function addMember(PolarisPlayer $player): void
     {
         $this->members[$player->getUniqueId()->toString()] = $player;
@@ -132,7 +140,21 @@ class Team{
 
     public function removeMember(PolarisPlayer $player): void
     {
+        if ($this->isOwner($player)){
+           $rand = array_rand($this->members);
+            $this->setOwner($this->members[$rand[0]]);
+        }
+        $player->getTeamManager()->setTeam(null);
         unset($this->members[$player->getUniqueId()->toString()]);
+    }
+
+    public function setOwner(PolarisPlayer $player): void
+    {
+        if(!$this->isMember($player)){
+            return;
+        }
+        $player->sendMessage("§cVous êtes désormais le propriétaire de votre équipe");
+        $this->owner = $player;
     }
 
 }

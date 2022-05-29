@@ -1,6 +1,6 @@
 <?php
 
-namespace PolarisCore\Rank;
+namespace UnknowL\Rank;
 
 abstract class Rank{
 

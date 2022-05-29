@@ -28,10 +28,9 @@ class ChatUtils{
         return false;
     }
 
-    public static function withoutAccent(string $message): string{
-        $messages = str_replace(' ', '-', $message);
-        $messages = preg_replace('/pratique/[^A-Za-z0-9-]/', '', $messages);
-        return preg_replace('/pratique/-+/', '-', $messages);
+    public static function withoutAccent(string $str): string{
+        $str = strtolower($str);
+        return strtr(utf8_decode($str), utf8_decode('àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝ'), 'aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUY');
     }
 
 }

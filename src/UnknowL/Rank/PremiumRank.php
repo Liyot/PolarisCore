@@ -2,7 +2,7 @@
 
 namespace UnknowL\Rank;
 
-use PolarisCore\Rank\Rank;
+use UnknowL\Rank\Rank;
 
 class PremiumRank extends Rank
 {
