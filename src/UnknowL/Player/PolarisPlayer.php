@@ -11,6 +11,8 @@ class PolarisPlayer extends Player{
 
     private TeamManager $teamManager;
 
+    public array $request = [];
+
     private object $rank;
 
     public function initEntity(CompoundTag $nbt): void
@@ -18,6 +20,16 @@ class PolarisPlayer extends Player{
 
         parent::initEntity($nbt);
         $this->teamManager = new TeamManager($this);
+    }
+
+    public function addResquest(string $name, mixed $value = null): void
+    {
+        $this->request[$name] = $value;
+    }
+
+    public function getRequest(string $name): mixed
+    {
+        return $this->request[$name];
     }
 
     public function isPremium(): bool

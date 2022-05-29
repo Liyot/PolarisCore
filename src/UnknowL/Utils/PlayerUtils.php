@@ -8,9 +8,9 @@ use UnknowL\Player\PolarisPlayer;
 
 class PlayerUtils{
 
-    public static function sendVerification(PolarisPlayer $player, callable $action): void{
+    public static function sendVerification(PolarisPlayer $player, callable $action, string $text = ""): void{
         Utils::validateCallableSignature(function(PolarisPlayer $player){}, $action);
-        $form = new ModalForm("§l§aPolaris§r§7", "§7Êtes vous sûr?", function (PolarisPlayer $player, bool $response) use ($action){
+        $form = new ModalForm("§l§aPolaris§r§7", "§7Êtes vous sûr $text?", function (PolarisPlayer $player, bool $response) use ($action){
             if($response){
                 $action($player);
             }
