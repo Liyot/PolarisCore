@@ -9,6 +9,9 @@ use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerCreationEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\network\mcpe\protocol\BlockEventPacket;
+use pocketmine\network\mcpe\protocol\ClientboundPacket;
+use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
+use pocketmine\network\mcpe\protocol\ServerboundPacket;
 use pocketmine\Server;
 use UnknowL\Player\PolarisPlayer;
 
@@ -29,7 +32,8 @@ class PlayerListener implements Listener{
 
     public function onReceive(DataPacketReceiveEvent $event){
         $packet = $event->getPacket();
-        if($packet instanceof BlockEventPacket){
+
+        if($packet instanceof ServerboundPacket && !$packet instanceof PlayerAuthInputPacket){
             var_dump($packet);
         }
     }

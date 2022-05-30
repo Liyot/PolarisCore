@@ -16,7 +16,8 @@ class ChatUtils{
         "fdp",
         "pute",
         "putain",
-        "negre"];
+        "negre",
+        "ntm"];
 
     public static function containBadWord(string $message): bool{
         $str  = self::withoutAccent($message);

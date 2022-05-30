@@ -63,7 +63,8 @@ class Team{
         $this->members = [];
     }
 
-    public function leave(PolarisPlayer $player){
+    public function leave(PolarisPlayer $player): void
+    {
         if(!$this->isMember($player)){
             return;
         }

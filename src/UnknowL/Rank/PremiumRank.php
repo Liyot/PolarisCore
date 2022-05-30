@@ -2,9 +2,8 @@
 
 namespace UnknowL\Rank;
 
-use UnknowL\Rank\Rank;
 
-class PremiumRank extends Rank
+class PremiumRank implements Rank
 {
     public function getName(): string
     {
@@ -16,13 +15,14 @@ class PremiumRank extends Rank
         return '#00FF00';
     }
 
-    public function getLevel(): int
+    public function isPremium(): bool
     {
-        return 2;
+        return true;
     }
 
-    public function getRecompense()
+
+    public function getPrefix(): string
     {
-        // TODO: Implement getRecompense() method.
+        return "§l§b[Premium]§l§b";
     }
 }

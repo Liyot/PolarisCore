@@ -2,10 +2,16 @@
 
 namespace UnknowL\Rank;
 
-abstract class Rank{
+use pocketmine\item\Item;
 
-    abstract public function getName();
+interface Rank{
 
-    abstract function getRecompense();
+     public function getName(): string;
+     
+    public function getColor(): string;
+     
+    public function getPrefix(): string;
+          
+    public function isPremium(): bool;
 
 }
