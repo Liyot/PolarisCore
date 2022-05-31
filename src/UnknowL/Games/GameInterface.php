@@ -2,12 +2,12 @@
 
 namespace UnknowL\Games;
 
+use UnknowL\Player\PolarisPlayer;
+
 interface GameInterface
 {
 
     public function getName(): string;
-
-    public function getCreationFunction(): callable;
 
     public function getGameId(): int;
 
@@ -16,5 +16,13 @@ interface GameInterface
     public function getMaxPlayers(): int;
 
     public function onTick(): void;
+
+    public function onStart(): void;
+
+    public function join(PolarisPlayer $player): void;
+
+    public function onCreation(): void;
+
+    public function onStop(): void;
 
 }

@@ -7,11 +7,18 @@ use pocketmine\item\Item;
 use pocketmine\math\Vector3;
 use pocketmine\Server;
 use UnknowL\Player\PolarisPlayer;
-use UnknowL\Utils\GameUtils;
 
 class GameLoader{
 
-    private static GameInterface $game;
+    /**
+     * @var GameInterface[]
+     */
+    private static array $game = [];
+
+    /**
+     * @var callable[]
+     */
+    protected array $GameProcessCallback;
 
     /**
      * @param Vector3[] $pos
@@ -36,7 +43,8 @@ class GameLoader{
         return null;
     }
 
-    public static function init(){
+    protected static function init(): void
+    {
         self::registerGame();
     }
 
@@ -52,4 +60,21 @@ class GameLoader{
             }
         }
     }
+
+    final public function addCallback(string $name, callable $callback): void{
+        if(!isset($this->GameProcessCallback[$name])){
+            $this->GameProcessCallback[$name] = $callback;
+        }
+    }
+
+    final protected function processCallback(string $name, array $args = []): void{
+        if(isset($this->GameProcessCallback[$name])){
+            $this->GameProcessCallback[$name](...$args);
+        }
+    }
+
+    public static function getGame(string $name): GameInterface|null{
+        return self::$game[$name] ?? null;
+    }
+
 }
