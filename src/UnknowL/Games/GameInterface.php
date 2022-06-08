@@ -15,11 +15,15 @@ interface GameInterface
 
     public function getMaxPlayers(): int;
 
+    public function getZone(): Zone;
+
     public function onTick(): void;
 
     public function onStart(): void;
 
     public function join(PolarisPlayer $player): void;
+
+    public function leave(PolarisPlayer $player): void;
 
     public function onCreation(): void;
 

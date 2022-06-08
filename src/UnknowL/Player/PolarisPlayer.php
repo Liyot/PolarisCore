@@ -7,15 +7,20 @@ use pocketmine\player\Player;
 use UnknowL\Games\GameInterface;
 use UnknowL\Groups\TeamManager;
 use UnknowL\Rank\PremiumRank;
+use UnknowL\Trait\VectorUtilsTrait;
 use UnknowL\Utils\PlayerUtils;
 
 class PolarisPlayer extends Player{
+
+    use VectorUtilsTrait;
 
     private TeamManager $teamManager;
 
     public array $request = [];
 
     private object $rank;
+
+    public GameInterface|null $actualGame = null;
 
     public bool $isRiding = false, $inGame = false;
 
@@ -26,6 +31,7 @@ class PolarisPlayer extends Player{
 
     public function initEntity(CompoundTag $nbt): void
     {
+        $this->player = $this;
         $this->rank = new PremiumRank();
         parent::initEntity($nbt);
         $this->teamManager = new TeamManager($this);
@@ -57,30 +63,26 @@ class PolarisPlayer extends Player{
         return $this->rank instanceof PremiumRank;
     }
 
-    /**
-     * @param PolarisPlayer $player
-     * @param Vector3[] $pos
-     * @return bool
-     */
-    public function inZone(PolarisPlayer $player, array $pos): bool{
-        $playerPos = $player->getPosition();
-        return $pos[0]->getX() <= $playerPos->getX() && $pos[1]->getX() >= $playerPos->getX() && $pos[0]->getY() <= $playerPos->getY()
-            && $pos[1]->getY() >= $playerPos->getY() && $pos[0]->getZ() <= $playerPos->getZ() && $pos[1]->getZ() >= $playerPos->getZ();
-    }
+
 
     public function isInGame(): bool
     {
         return $this->inGame;
     }
 
+    public function getActualGame(): ?GameInterface
+    {
+        return $this->actualGame;
+    }
+
 
     public function push(): void{
-        match ($this->getHorizontalFacing()){
-            Facing::NORTH => $this->getMotion()->add(1, 2, 0),
-            Facing::SOUTH => $this->getMotion()->add(-1, 2, 0),
-            Facing::EAST => $this->getMotion()->add(0, 2, -1),
-            Facing::WEST => $this->getMotion()->add(0, 2, 1),
-        };
+        $vector = $this->getMatchedVector(1, 1);
+        $this->getMotion()->add($vector->x, $vector->y, $vector->z);
+    }
+
+    public function leaveGame(GameInterface $game): void{
+
     }
 
     public function joinGame(GameInterface $game): void{
@@ -88,17 +90,23 @@ class PolarisPlayer extends Player{
         if($this->getTeamManager()->hasTeam()){
             foreach ($team->getMembers() as $member){
                 if(!$this->inGame){
-                    PlayerUtils::sendVerification($member, function (PolarisPlayer $player) use ($game) {
-                        $player->sendMessage("§c{$this->getName()} §7à rejoint la partie");
+                    PlayerUtils::sendVerification($member, function (PolarisPlayer $player) use ($member, $game) {
+                        $member->sendMessage("§c{$this->getName()} §7à rejoint la partie");
                         $game->join($player);
                     });
                 }
             }
+        }else{
+            $game->join($this);
         }
     }
 
     public function canJoin(GameInterface $game): bool{
-        return $game->properties->getProperties("Starting") === false && $game->properties->getProperties("Ending") === false && $this->hasAccepted[$game->getName()];
+        return !$game->properties->getProperties("Starting") && !$game->properties->getProperties("Ending") && $this->hasAccepted($game);
+    }
+
+    public function hasAccepted(GameInterface $game): bool{
+        return $this->hasAccepted[$game->getName()] ?? false;
     }
 
     public function getTeamManager(): TeamManager{

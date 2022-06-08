@@ -34,7 +34,7 @@ class PlayerListener implements Listener{
         $packet = $event->getPacket();
 
         if($packet instanceof ServerboundPacket && !$packet instanceof PlayerAuthInputPacket){
-            var_dump($packet);
+            //var_dump($packet);
         }
     }
 

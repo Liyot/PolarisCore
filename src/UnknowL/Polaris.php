@@ -8,10 +8,12 @@ use pocketmine\entity\EntityFactory;
 use pocketmine\item\ItemFactory;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\plugin\PluginBase;
-use pocketmine\utils\Config;
 use pocketmine\world\World;
 use UnknowL\Command\Groups\GroupsCommand;
 use UnknowL\Entity\PearlEntity;
+use UnknowL\Entity\ShulkerEntity;
+use UnknowL\Games\GameListener;
+use UnknowL\Games\GameLoader;
 use UnknowL\Groups\Team;
 use UnknowL\Item\EnderPearl;
 use UnknowL\Listener\PlayerListener;
@@ -25,10 +27,23 @@ class Polaris extends PluginBase{
             return new PearlEntity(EntityDataHelper::parseLocation($nbt, $world), null, $nbt);
         }, ['ThrownEnderpearl', 'minecraft:ender_pearl'], LegacyIds::ENDER_PEARL);
 
+        EntityFactory::getInstance()->register(ShulkerEntity::class, function (World $world, CompoundTag $nbt): ShulkerEntity{
+            return new ShulkerEntity(EntityDataHelper::parseLocation($nbt, $world), false, null);
+        }, ['ShulkerEntity'], LegacyIds::SHULKER_BULLET);
+
         ItemFactory::getInstance()->register(new EnderPearl(), true);
 
+        GameLoader::init();
+
         $this->getServer()->getPluginManager()->registerEvents(new PlayerListener() , $this);
+        $this->getServer()->getPluginManager()->registerEvents(new GameListener(), $this);
         $this->getServer()->getCommandMap()->register('', new GroupsCommand());
+    }
+
+    public function onDisable(): void{
+        foreach(GameLoader::getGameList() as $game){
+            $game->onStop();
+        }
     }
 
     public static function getTeam(string $name): ?Team{

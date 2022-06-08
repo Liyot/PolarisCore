@@ -2,7 +2,6 @@
 
 namespace UnknowL\Utils;
 
-use pocketmine\math\Vector3;
 use pocketmine\utils\Utils;
 use UnknowL\forms\ModalForm;
 use UnknowL\Player\PolarisPlayer;

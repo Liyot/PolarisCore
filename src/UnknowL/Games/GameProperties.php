@@ -11,7 +11,7 @@ class GameProperties{
     }
 
     public function setProperties(string $name, $value): self{
-        $this->properties[$name] = $value;
+        $this->properties[strtolower($name)] = $value;
         return $this;
     }
 
@@ -26,11 +26,12 @@ class GameProperties{
 
     public function setBaseProperties(): void{
      $this->properties  = [
-         "Starting" => false,
-         "Ending" => false,
-         "Running" => false,
-         "RunningFor" => 0,
-         "TimeLeft" => 0,
+         "starting" => false,
+         "ending" => false,
+         "running" => false,
+         "acceptplayerwhenrunning" => false,
+         "runningfor" => 0,
+         "timeleft" => 0,
      ];
     }
 }

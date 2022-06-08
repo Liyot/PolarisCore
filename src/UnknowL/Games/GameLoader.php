@@ -2,6 +2,7 @@
 
 namespace UnknowL\Games;
 
+use JetBrains\PhpStorm\Pure;
 use pocketmine\block\Block;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
@@ -18,7 +19,7 @@ class GameLoader{
     /**
      * @var callable[]
      */
-    protected array $GameProcessCallback;
+    protected array $GameProcessCallback = [];
 
     /**
      * @param Vector3[] $pos
@@ -32,7 +33,7 @@ class GameLoader{
                 $players = [];
                 foreach (Server::getInstance()->getOnlinePlayers() as $player){
                     if($player instanceof PolarisPlayer){
-                        if($player->inZone($player, $pos)){
+                        if($player->inZone($player,$pos)){
                             $players[$player->getUniqueId()->toString()] = $player;
                         }
                     }
@@ -43,19 +44,28 @@ class GameLoader{
         return null;
     }
 
-    protected static function init(): void
+    #[Pure] public function getGameByZone(Zone $zone): GameInterface{
+        return $zone->getGame();
+    }
+
+    public static function init(): void
     {
         self::registerGame();
     }
 
     private static function registerGame(): void{
-        $dir = __DIR__ . "/Types/";
+        $dir = __DIR__ . "\Types\\";
         foreach (scandir($dir) as $file){
-            if(is_file($dir . $file)){
-                $class = explode(".", $file)[0];
-                $class = new $dir.$class();
-                if($class instanceof GameInterface){
-                    self::$game[$class->getName()] = $class;
+            if(!in_array($file, [".", ".."])){
+                if(is_file($dir . $file)){
+                    $class = explode(".", $file)[0];
+                    $class = substr($dir.$class, strpos($dir.$class ,"UnknowL\\"));
+                    $class = str_replace("/", "\\", $class);
+                    var_dump($class);
+                    $class = new $class();
+                    if($class instanceof GameInterface){
+                        self::$game[$class->getName()] = $class;
+                    }
                 }
             }
         }
@@ -75,6 +85,10 @@ class GameLoader{
 
     public static function getGame(string $name): GameInterface|null{
         return self::$game[$name] ?? null;
+    }
+
+    public static function getGameList(): array{
+        return self::$game;
     }
 
 }
