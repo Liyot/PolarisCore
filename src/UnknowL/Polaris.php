@@ -12,11 +12,14 @@ use pocketmine\world\World;
 use UnknowL\Command\Groups\GroupsCommand;
 use UnknowL\Entity\PearlEntity;
 use UnknowL\Entity\ShulkerEntity;
+use UnknowL\forms\CustomForm;
+use UnknowL\forms\menu\Button;
 use UnknowL\Games\GameListener;
 use UnknowL\Games\GameLoader;
 use UnknowL\Groups\Team;
 use UnknowL\Item\EnderPearl;
 use UnknowL\Listener\PlayerListener;
+use UnknowL\Task\ScoreboardTask;
 
 class Polaris extends PluginBase{
 
@@ -28,16 +31,21 @@ class Polaris extends PluginBase{
         }, ['ThrownEnderpearl', 'minecraft:ender_pearl'], LegacyIds::ENDER_PEARL);
 
         EntityFactory::getInstance()->register(ShulkerEntity::class, function (World $world, CompoundTag $nbt): ShulkerEntity{
-            return new ShulkerEntity(EntityDataHelper::parseLocation($nbt, $world), false, null);
+            return new ShulkerEntity(EntityDataHelper::parseLocation($nbt, $world), [false], null);
         }, ['ShulkerEntity'], LegacyIds::SHULKER_BULLET);
 
         ItemFactory::getInstance()->register(new EnderPearl(), true);
 
         GameLoader::init();
 
+        $form = new CustomForm('eee', "eee", function (){},  );
+        $form->appendElements(new Button("eee", ));
+
         $this->getServer()->getPluginManager()->registerEvents(new PlayerListener() , $this);
         $this->getServer()->getPluginManager()->registerEvents(new GameListener(), $this);
         $this->getServer()->getCommandMap()->register('', new GroupsCommand());
+
+        $this->getScheduler()->scheduleRepeatingTask(new ScoreboardTask(), 20);
     }
 
     public function onDisable(): void{

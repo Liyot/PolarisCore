@@ -24,7 +24,7 @@ class GameListener implements Listener{
                     $cooldown = $this->cooldown[$player->getName()] ?? 0;
                     if($cooldown < time()){
                         $location =  Location::fromObject($player->getLocation()->add(0, 1, 0), $player->getWorld(), $player->getLocation()->yaw);
-                        $entity = new ShulkerEntity($location, true);
+                        $entity = new ShulkerEntity($location, [false, "game" => $player->getActualGame()]);
                         $entity->spawnToAll();
                         $this->cooldown[$player->getName()] = time() + 5;
                         $entity->setMotion($player->getDirectionVector());
@@ -50,6 +50,10 @@ class GameListener implements Listener{
                 }elseif (($actualgame = $player->getActualGame()) instanceof $game){
                     $actualgame->leave($player);
                 }
+            }
+            $properties = $player->getPlayerProperties();
+            if(!$properties->getProperties("cleanScreen")){
+                $properties->setProperties("cleanScreen", true);
             }
         }
     }

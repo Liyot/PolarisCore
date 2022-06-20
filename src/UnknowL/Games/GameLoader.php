@@ -8,6 +8,7 @@ use pocketmine\item\Item;
 use pocketmine\math\Vector3;
 use pocketmine\Server;
 use UnknowL\Player\PolarisPlayer;
+use UnknowL\Utils\Scoreboard;
 
 class GameLoader{
 
@@ -48,6 +49,11 @@ class GameLoader{
         return $zone->getGame();
     }
 
+    public function sendScoreboard(PolarisPlayer $player, GameInterface $game): void
+    {
+        $player->setScoreboard(new Scoreboard("§l§b[§a".$game->getName()."§b]", ["aaaaaa", "bbbbb", "cccccc"]));
+    }
+
     public static function init(): void
     {
         self::registerGame();
@@ -61,7 +67,6 @@ class GameLoader{
                     $class = explode(".", $file)[0];
                     $class = substr($dir.$class, strpos($dir.$class ,"UnknowL\\"));
                     $class = str_replace("/", "\\", $class);
-                    var_dump($class);
                     $class = new $class();
                     if($class instanceof GameInterface){
                         self::$game[$class->getName()] = $class;

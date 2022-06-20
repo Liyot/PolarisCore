@@ -2,10 +2,12 @@
 
 namespace UnknowL\Player;
 
+use UnknowL\Trait\PropertiesTrait;
+
 class PlayerProperties{
+    use PropertiesTrait;
 
-    public int $id;
-
-
-
+    public function __construct(){
+        $this->setBaseProperties(["cleanscreen" => true, "hastouched" => false]);
+    }
 }

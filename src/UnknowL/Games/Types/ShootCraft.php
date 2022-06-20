@@ -100,6 +100,7 @@ class ShootCraft extends GameLoader implements GameInterface{
             $player->sendMessage("§l§b[§aShootCraft§b] §aVous avez rejoint le ShootCraft !");
             $this->players[$player->getUniqueId()->toString()] = $player;
             $player->inGame = true;
+            $this->sendScoreboard($player, $this);
             $player->actualGame = $this;
         }else{
             $player->push();
@@ -115,6 +116,7 @@ class ShootCraft extends GameLoader implements GameInterface{
             $player->inGame = false;
             $player->actualGame = null;
             $player->hasAccepted[$this->getName()] = false;
+            $player->setScoreboard(PlayerUtils::getBaseScoreboard($player));
             $player->sendMessage("§l§b[§aShootCraft§b] §aVous avez quitté le ShootCraft !");
         }
     }
