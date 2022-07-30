@@ -1,5 +1,6 @@
 name: PolarisCore
-main: UnknowL\Polaris
+src-namespace-prefix: Polaris
+main: Polaris\Polaris
 api: 4.0.0
 version: 1.0.0
-authors: [UnknowL, SlayerSurYT]
+authors: [UnknowL]
