@@ -4,6 +4,9 @@ namespace Polaris\trait;
 
 
 use pocketmine\block\BlockFactory;
+use pocketmine\block\utils\DyeColor;
+use pocketmine\block\VanillaBlocks;
+use pocketmine\color\Color;
 use pocketmine\data\bedrock\EntityLegacyIds as LegacyIds;
 use pocketmine\entity\EntityDataHelper;
 use pocketmine\entity\EntityFactory;
@@ -21,8 +24,13 @@ use Polaris\blocks\EndPlate;
 use Polaris\entity\FloatingText;
 use Polaris\entity\PearlEntity;
 use Polaris\entity\ShulkerEntity;
+use Polaris\forms\menu\Button;
+use Polaris\forms\MenuForm;
+use Polaris\games\Game;
 use Polaris\games\Types\GetDown;
+use Polaris\games\types\RushGame;
 use Polaris\games\types\ShootCraft;
+use Polaris\groups\Group;
 use Polaris\item\ItemManager;
 use Polaris\item\Specialitem;
 use Polaris\player\PolarisPlayer;
@@ -80,7 +88,11 @@ trait LoaderTrait{
     }
 
     private function loadCustomGames(): void{
-        for ($x = 6; $x > 0; $x--){
+        for($i = 0; $i != 15; $i++)
+        {
+            new RushGame("1vs1", $i);
+        }
+      /**  for ($x = 6; $x > 0; $x--){
             new GetDown("getdownnn");
         }
 
@@ -90,5 +102,5 @@ trait LoaderTrait{
             "-57:60:-62" => new CustomPlate(), "-59:60:-62" => new CustomPlate(), "-61:60:-62" => new CustomPlate(),
             "-63:60:-62" => new CustomPlate(), "-65:60:-62" => new EndPlate()];
         new Jump(2, 99999, PHP_INT_MAX,'Jump', new Position(-51, 61, -62, GameUtils::getSpawnWorld()), 5, $blocks);
-    }
+   */ }
 }

@@ -46,28 +46,28 @@ class GameLoader{
      */
     public function scanZone(array $pos, int $type): array|null
     {
-        switch ($type){
+        switch ($type) {
             case 0:
                 $players = [];
-                foreach (Server::getInstance()->getOnlinePlayers() as $player){
-                    if($player instanceof PolarisPlayer){
-                        if($player->inZone($player,$pos)){
+                foreach (Server::getInstance()->getOnlinePlayers() as $player) {
+                    if ($player instanceof PolarisPlayer) {
+                        if ($player->inZone($player, $pos)) {
                             $players[$player->getUniqueId()->toString()] = $player;
                         }
                     }
                 }
                 return $players;
-            break;
         }
         return null;
     }
 
     public function init(): void
     {
+        self::registerGame();
+        if(Server::getInstance()->getWorldManager()->getWorldByName("PolarisSpawn") == null) return;
         $this->tickerEntity = new FloatingText(new Location(-63, 60, -68, Server::getInstance()->getWorldManager()->getWorldByName("PolarisSpawn"), 0, 0));
         $this->tickerEntity->setText("Bienvenue sur Polaris !");
         $this->tickerEntity->spawnToAll();
-        self::registerGame();
     }
 
     private static function registerGame(): void{

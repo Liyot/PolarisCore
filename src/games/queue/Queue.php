@@ -2,6 +2,7 @@
 
 namespace Polaris\games\queue;
 
+use pocketmine\utils\Config;
 use Polaris\games\Game;
 use Polaris\player\PolarisPlayer;
 
@@ -18,6 +19,7 @@ final class Queue{
     public function addPlayer(PolarisPlayer $player): void{
         if(count($this->players) < $this->max){
             $this->players[] = $player;
+            $this->update();
         }
     }
 
@@ -43,15 +45,16 @@ final class Queue{
         $this->players = array_filter($this->players, function(PolarisPlayer $p) use ($player){
             return $p->getName() !== $player->getName();
         });
+        $this->update();
     }
 
     final public function update(): void
     {
         if(!empty($this->players)){
-            if($this->game->properties->getProperties("Starting")){
+            if($this->game->properties->getProperties("starting")){
                 if(count($this->game->getPlayers()) < $this->game->getMaxPlayers()){
                     $player = array_shift($this->players);
-                    $this->game->join($player,  $this->game);
+                    $this->game->join($player);
                 }else{
                     foreach ($this->players as $place => $player){
                         $player->sendPopup($place + 1 . "/" . count($this->players));

@@ -9,6 +9,7 @@ class GameUtils{
 
     public const ID_SHOOTCRAFT = 0;
     public const ID_GETDOWN = 1;
+    public const ID_RUSHGAME = 2;
 
     public const NOT_LOADED = [
         "getdown",
@@ -17,7 +18,8 @@ class GameUtils{
 
     public const GameName = [
         self::ID_SHOOTCRAFT => "ShootCraft",
-        self::ID_GETDOWN => "GetDown"
+        self::ID_GETDOWN => "GetDown",
+        self::ID_RUSHGAME => "RushGame"
     ];
 
     public static function getSpawnWorld(): World{

@@ -12,6 +12,7 @@ use Polaris\games\GameLoader;
 use Polaris\games\Zone;
 use Polaris\player\PolarisPlayer;
 use Polaris\utils\GameUtils;
+use Polaris\utils\ListenerUtils;
 
 class GetDown extends RoundedGames
 {
@@ -41,7 +42,7 @@ class GetDown extends RoundedGames
 
     public function initListener(): void
     {
-        $this->addCallback("PlayerMoveEvent", function (EntityDamageEvent $event): void{
+        $this->addCallback(ListenerUtils::PLAYER_MOVE, function (EntityDamageEvent $event): void{
             $player = $event->getEntity();
             $cause = $event->getCause();
             $world = $player->getWorld();

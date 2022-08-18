@@ -6,7 +6,7 @@ namespace Polaris\groups;
 use Polaris\player\PolarisPlayer;
 use Polaris\utils\ChatUtils;
 
-class Team{
+class Group{
 
     /**
      * @var array PolarisPlayer[]
@@ -21,10 +21,10 @@ class Team{
 
     private int $maxMembers;
 
-    public function __construct( PolarisPlayer $owner, string $name = null){
+    public function __construct(PolarisPlayer $owner, string $name = null){
         $this->owner = $owner;
         $this->addMember($owner);
-        $this->name = is_null($name) ? $this->owner->getName()." Team" : $name;
+        $this->name = is_null($name) ? $this->owner->getName()." Group" : $name;
         $this->premium = $this->owner->isPremium();
         $this->maxMembers = $this->isPremium()? 8 : 4;
     }
@@ -57,7 +57,7 @@ class Team{
         $this->sendMessage("§cVotre équipe a été supprimée", $this->owner);
 
         foreach($this->members as $member){
-            $member->getTeamManager()->setTeam(null);
+            $member->getGroupManager()->setGroup(null);
         }
         $this->owner = null;
         $this->members = [];
@@ -69,7 +69,7 @@ class Team{
             return;
         }
 
-        $player->getTeamManager()->setTeam(null);
+        $player->getGroupManager()->setGroup(null);
         $player->sendMessage("§cVous avez quitté votre équipe");
         $this->removeMember($player);
 
@@ -145,7 +145,7 @@ class Team{
            $rand = array_rand($this->members);
             $this->setOwner($this->members[$rand[0]]);
         }
-        $player->getTeamManager()->setTeam(null);
+        $player->getGroupManager()->setGroup(null);
         unset($this->members[$player->getUniqueId()->toString()]);
     }
 
@@ -157,5 +157,4 @@ class Team{
         $player->sendMessage("§cVous êtes désormais le propriétaire de votre équipe");
         $this->owner = $player;
     }
-
 }

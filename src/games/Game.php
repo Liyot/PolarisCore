@@ -5,10 +5,13 @@ namespace Polaris\games;
 use pocketmine\player\GameMode;
 use pocketmine\utils\Utils;
 use Polaris\player\PolarisPlayer;
+use Polaris\trait\callBackTrait;
 use Polaris\utils\PlayerUtils;
 use Polaris\utils\Scoreboard;
 
 abstract class Game implements GameInterface{
+
+    use callBackTrait;
 
     /**
      * @var PolarisPlayer[]
@@ -17,16 +20,14 @@ abstract class Game implements GameInterface{
 
     public GameProperties $properties;
 
-    /**
-     * @var callable[]
-     */
-    protected array $GameProcessCallback = [];
-
     public function __construct(protected int $id, protected int $maxPlayer, protected int $time, protected string  $name = ""){
         $this->initProperties();
     }
 
-    abstract public function getName(): string;
+    public function getName(): string
+    {
+        return $this->name;
+    }
 
     public function join(PolarisPlayer $player): void{
         $player->setGamemode(GameMode::SURVIVAL());
@@ -34,7 +35,7 @@ abstract class Game implements GameInterface{
         $this->players[$player->getUniqueId()->toString()] = $player;
         $player->inGame = true;
         $player->getInventory()->clearAll();
-        $this->sendScoreboard($player, $this);
+        $this->sendScoreboard($player);
         $player->actualGame = $this;
         $player->hasAccepted[$this->getName()] = false;
     }
@@ -67,18 +68,6 @@ abstract class Game implements GameInterface{
     public function sendScoreboard(PolarisPlayer $player): void
     {
         $player->setScoreboard(new Scoreboard("§l§b[§a".$this->getName()."§b]", ["aaaaaa", "bbbbb", "cccccc"]));
-    }
-
-     final public function addCallback(string $name, callable $callback): void{
-        if(!isset($this->GameProcessCallback[$name])){
-            $this->GameProcessCallback[$name] = $callback;
-        }
-    }
-
-     final public function processCallback(string $name, ...$args): void{
-        if(isset($this->GameProcessCallback[$name])){
-            $this->GameProcessCallback[$name](...$args);
-        }
     }
 
     public function initProperties(): void

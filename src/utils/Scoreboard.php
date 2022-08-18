@@ -44,25 +44,29 @@ class Scoreboard
         }
     }
 
-    public function addLine(int $id,PolarisPlayer $player, string $line): void{
+    public function addLine(int $line,PolarisPlayer $player, string $text): void{
 
-        if(isset($this->lines[$id])){
+        if(isset($this->lines[$line])){
             $pk = new  SetScorePacket();
             $pk->type = SetScorePacket::TYPE_REMOVE;
-            $pk->entries[] = $this->lines[$id];
+            $pk->entries[] = $this->lines[$line];
             $player->getNetworkSession()->sendDataPacket($pk);
-            unset($this->lines[$id]);
+            unset($this->lines[$line]);
         }
         $packet = new ScorePacketEntry();
-        $packet->score = $id;
+        $packet->score = $line;
         $packet->objectiveName = $player->getName();
         $packet->type = ScorePacketEntry::TYPE_FAKE_PLAYER;
-        $packet->customName = $line;
-        $packet->scoreboardId = $id;
+        $packet->customName = $text;
+        $packet->scoreboardId = $line;
         $packet->actorUniqueId = $player->getId();
-        $this->lines[$id] = $packet;
+        $this->lines[$line] = $packet;
         $scoreboard = SetScorePacket::create(SetScorePacket::TYPE_CHANGE, [$packet]);
         $player->getNetworkSession()->sendDataPacket($scoreboard);
     }
 
+    public function getText(int $line): string
+    {
+        return $this->lines[$line] ?? "";
+    }
 }

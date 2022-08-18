@@ -14,30 +14,30 @@ use Polaris\utils\GameUtils;
 class ShootCraft extends Game implements ZoneGame
 {
 
-
     private Zone $zone;
 
-    public function __construct(){
+    public function __construct()
+    {
 
         GameLoader::getInstance()->addGame($this);
 
         Server::getInstance()->getWorldManager()->loadWorld("shootcraft");
         $world = Server::getInstance()->getWorldManager()->getWorldByName("shootcraft");
-        $this->zone = new Zone("ShootCraft", new Position(-9999, 0, -9999, $world), $this,new Position(9999, 256, 9999, $world), new Position(500, 70, 250,$world));
+        $this->zone = new Zone("ShootCraft", new Position(-9999, 0, -9999, $world), $this, new Position(9999, 256, 9999, $world), new Position(500, 70, 250, $world));
 
-        $this->addCallback('Start', function (Server $server){
+        $this->addCallback('Start', function (Server $server) {
             $this->initProperties();
             $this->properties->setProperties('Starting', false)->setProperties('Running', true)->setProperties(GameUtils::PROPERTIES_ACCEPT_PLAYERS, true);
-            foreach ($server->getOnlinePlayers() as $player){
+            foreach ($server->getOnlinePlayers() as $player) {
                 $player->sendMessage("§l§b[§aShootCraft§b] §aLe shootcraft a commencé !");
             }
         });
 
-        $this->addCallback('Stop', function (Server $server){
-            foreach ($this->zone->getEntities() as $entity){
+        $this->addCallback('Stop', function (Server $server) {
+            foreach ($this->zone->getEntities() as $entity) {
                 $entity->close();
             }
-            foreach ($server->getOnlinePlayers() as $player){
+            foreach ($server->getOnlinePlayers() as $player) {
                 $player->sendMessage("§l§b[§aShootCraft§b] §aLe shootcraft a fini !");
             }
         });
@@ -62,7 +62,8 @@ class ShootCraft extends Game implements ZoneGame
         $player->teleport($this->zone->getMainPosition());
     }
 
-    public function onCreation(): void{
+    public function onCreation(): void
+    {
         $this->onStart();
     }
 

@@ -43,7 +43,6 @@ class Jump extends Game{
 
     public function __construct(public int $id, public int $maxPlayer, public int $time, public string $name, public Position $pos, private int $maxcheckpoints, array $nonPlacedblocks)
     {
-
         GameLoader::getInstance()->addGame($this);
 
        $entity = new FloatingText(Location::fromObject($pos->asVector3()->add(0, 0, 3), $pos->getWorld()));

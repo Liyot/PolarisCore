@@ -16,8 +16,8 @@ trait PropertiesTrait
         return $this;
     }
 
-    public function setNestedProperties($key, $value) : void{
-        $vars = explode(".", $key);
+    public function setNestedProperties($nameey, $value) : void{
+        $vars = explode(".", $nameey);
         $base = array_shift($vars);
 
         if(!isset($this->properties[$base])){
@@ -42,21 +42,28 @@ trait PropertiesTrait
      * @return mixed
      */
     public function getNestedProperties(string $name): mixed{
+        if(isset($this->properties[$name])){
+            return $this->properties[$name];
+        }
+
         $vars = explode(".", $name);
-        $base = array_shift($vars);
+        $base = strtolower(array_shift($vars));
         if(isset($this->properties[$base])){
             $base = $this->properties[$base];
         }else{
             return null;
         }
+
         while(count($vars) > 0){
-            $baseKey = array_shift($vars);
-            if(is_array($base) && isset($base[$baseKey])){
-                return $base[$baseKey];
+            $basek = array_shift($vars);
+            if(is_array($base) && isset($base[$basek])){
+                $base = $base[$basek];
+            }else{
+                return null;
             }
-            return null;
         }
-        return $base;
+
+        return $this->properties[$name] = $base;
     }
 
     public function removeProperties(string $name): self{
