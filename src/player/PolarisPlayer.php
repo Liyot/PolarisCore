@@ -172,7 +172,7 @@ class PolarisPlayer extends Player
 
     public function teleportToSpawn(): void
     {
-        $this->teleport(new Position(-57, 60, -68, Server::getInstance()->getWorldManager()->getWorldByName("PolarisSpawn")));
+        //$this->teleport(new Position(-57, 60, -68, Server::getInstance()->getWorldManager()->getWorldByName("PolarisSpawn")));
         $this->getInventory()->clearAll();
         $this->getArmorInventory()->clearAll();
         $this->giveHubStuff();

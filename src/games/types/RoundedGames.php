@@ -70,7 +70,6 @@ abstract class RoundedGames extends Game implements ZoneGame
             if($this->round === $this->getMaxRound()){
                 foreach ($this->zone->getEntities() as $entity){
                     $entity->close();
-                    var_dump("hnnn");
                 }
                 foreach ($server->getOnlinePlayers() as $player){
                     if ($player instanceof PolarisPlayer){

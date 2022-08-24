@@ -3,6 +3,7 @@
 namespace Polaris;
 
 use pocketmine\entity\Entity;
+use pocketmine\item\enchantment\StringToEnchantmentParser;
 use pocketmine\item\ItemFactory;
 use pocketmine\item\VanillaItems;
 use pocketmine\math\Vector3;
@@ -21,8 +22,6 @@ use Polaris\listener\PacketListener;
 use Polaris\listener\PlayerListener;
 use Polaris\task\ScoreboardTask;
 use Polaris\trait\LoaderTrait;
-use Polaris\trait\VectorUtilsTrait;
-use Polaris\Utils\ConversionUtils;
 use Polaris\utils\GameUtils;
 
 class Polaris extends PluginBase
@@ -37,7 +36,6 @@ class Polaris extends PluginBase
     {
 
         self::setInstance($this);
-
 
         $this->getServer()->getWorldManager()->loadWorld('PolarisSpawn');
 

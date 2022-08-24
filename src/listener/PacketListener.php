@@ -16,7 +16,6 @@ class PacketListener implements Listener{
             if($packet instanceof PlayerAuthInputPacket){
                 if(($actions = $packet->getBlockActions()) !== null){
                     if ($player->getActualGame() === null){
-                        var_dump($actions);
                         foreach ($actions as $action){
                             /*if($action->getActionType() === BlockAct){
                             }*/

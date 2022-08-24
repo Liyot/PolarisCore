@@ -3,6 +3,7 @@
 namespace Polaris\games\types;
 
 use pocketmine\block\Bed;
+use pocketmine\block\Lava;
 use pocketmine\block\VanillaBlocks;
 use pocketmine\color\Color;
 use pocketmine\entity\Location;
@@ -39,7 +40,6 @@ use Polaris\utils\ListenerUtils;
 use Polaris\utils\PlayerUtils;
 use Polaris\utils\Scoreboard;
 
-//TODO: crée un item pour choisir sa team et mettre le joueur dans le trait TeamTrait
 final class RushGame extends Game
 {
     use callBackTrait;
@@ -78,7 +78,6 @@ final class RushGame extends Game
 
     public function __construct(string $type, int $count)
     {
-
         $maxPlayer = match ($type) {
             self::GAME_1VS1 => 1,
             self::GAME_2VS2 => 4,
@@ -264,7 +263,7 @@ final class RushGame extends Game
                             $p->sendMessage($player->getName() . " a explosé le lit de l'équipe Bleu");
                             $this->sendScoreboard($p);
                         }
-                        foreach ($this->getPlayers() as $p) {
+                        foreach ($this->players as $p) {
                             if ($p->getTeam()->getName() === "Blue") {
                                 $p->sendMessage("Votre lit d'équipe vient d'être détruit, vous ne réapparaîtrez plus");
                             }
@@ -279,7 +278,7 @@ final class RushGame extends Game
                             $p->sendMessage($player->getName() . " a explosé le lit de l'équipe Bleu");
                             $this->sendScoreboard($p);
                         }
-                        foreach ($this->getPlayers() as $p) {
+                        foreach ($this->players as $p) {
                             if ($p->getTeam()->getName() === "Red") {
                                 $p->sendMessage("Votre lit d'équipe vient d'être détruit, vous ne réapparaîtrez plus");
                             }
@@ -352,7 +351,7 @@ final class RushGame extends Game
                     foreach ($team->getPlayers() as $player) {
                         $player->sendTitle("§aPerdu !", "Votre équipe a perdu.", -1, 20, 20 * 2);
                     }
-                    foreach ($this->getPlayers() as $player) {
+                    foreach ($this->players as $player) {
                         if ($player->getTeam()->getName() != $team->getName()) {
                             $player->sendTitle("§6Victoire !", "Votre équipe a gagné !", -1, 20, 20 * 2);
                         }
@@ -372,7 +371,7 @@ final class RushGame extends Game
 
     public function preJoin(PolarisPlayer $player): void
     {
-        if ($player->canJoin($this) && count($this->getPlayers()) < $this->getMaxPlayers()) {
+        if ($player->canJoin($this) && count($this->players) < $this->getMaxPlayers()) {
             $this->join($player);
         } else {
             $player->push();
@@ -389,28 +388,27 @@ final class RushGame extends Game
         $player->sendMessage("§l§b[§a{$this->getName()}§b] §aVous avez rejoint le {$this->getName()} !");
         $this->players[$player->getName()] = $player;
         $this->getTeam("Red")->addPlayers($player);
-        if (count($this->getPlayers()) >= $this->getMaxPlayers()) {
+        if (count($this->players) >= $this->getMaxPlayers()) {
             Polaris::getInstance()->getScheduler()->scheduleRepeatingTask(new ClosureTask(function () {
-                if (count($this->getPlayers()) < $this->getMaxPlayers()) {
-                    foreach ($this->getPlayers() as $player) {
-                        $player->sendMessage("Il manque " . $this->getMaxPlayers() - count($this->getPlayers()) . " joueur pour commencer la partie.");
+                if (count($this->players) < $this->getMaxPlayers()) {
+                    foreach ($this->players as $player) {
+                        $player->sendMessage("Il manque " . $this->getMaxPlayers() - count($this->players) . " joueur pour commencer la partie.");
                     }
                     throw new CancelTaskException();
                 }
                 if ($this->cooldown <= 0) {
-                    foreach ($this->getPlayers() as $player) {
+                    foreach ($this->players as $player) {
                         $player->setTeam($this->getTeam("Blue"));
                         $player->inGame = true;
                         $player->getInventory()->clearAll();
                         $this->properties->setNestedProperties("GameInfo.Players." . $player->getName(), ["kill" => 0, "death" => 0]);
-                        $this->sendScoreboard($player);
                         $player->actualGame = $this;
                         $player->hasAccepted[$this->getName()] = false;
                     }
                     $this->onStart();
                     throw new CancelTaskException();
                 }
-                foreach ($this->getPlayers() as $player) {
+                foreach ($this->players as $player) {
                     $player->sendMessage("La partie commence dans $this->cooldown seconde(s)");
                 }
                 $this->cooldown--;
@@ -427,7 +425,7 @@ final class RushGame extends Game
          * pour la condition en dessous, c'est encore à voir (imaginons il a crash et il veut rejoin la game)
          */
         if ($this->properties->getProperties("GameInfo")["Players"][$player->getName()] !== null) $this->properties->removeProperties("GameInfo.Players." . $player->getName());
-        foreach ($this->getPlayers() as $p) {
+        foreach ($this->players as $p) {
             $this->sendScoreboard($p);
         }
         foreach ($player->getViewersPlayers() as $viewer) {
@@ -445,7 +443,7 @@ final class RushGame extends Game
             str_replace("{time}", $this->secondToTimer($this->time * 20), $this->getScoreboardLine()[0]),
             str_replace(["{blue}", "{red}"], [count($this->getTeam("Blue")?->getPlayers()), count($this->getTeam("Red")?->getPlayers())], $this->getScoreboardLine()[1]),
             str_replace("{alive}", $this->properties->getProperties("GameInfo")["BedAlive"][$player->getTeam()->getName()], $this->getScoreboardLine()[2]),
-            str_replace(["{kill}", "{death}"], [$this->timeToTwoChars((int)$this->properties->getProperties("GameInfo")["Players"][$player->getName()]["kill"]), $this->timeToTwoChars((int)$this->properties->getProperties("GameInfo")["Players"][$player->getName()]["death"])], $this->getScoreboardLine()[3]),
+            //str_replace(["{kill}", "{death}"], [$this->timeToTwoChars((int)$this->properties->getProperties("GameInfo")["Players"][$player->getName()]["kill"]), $this->timeToTwoChars((int)$this->properties->getProperties("GameInfo")["Players"][$player->getName()]["death"])], $this->getScoreboardLine()[3]),
         ]));
     }
 
@@ -454,7 +452,7 @@ final class RushGame extends Game
         $this->properties->setProperties("starting", false);
         $this->properties->setProperties("running", true);
         //TODO: mettre le joueur en team s'il en a pas
-        foreach ($this->getPlayers() as $player) {
+        foreach ($this->players as $player) {
             $this->processCallback("LoadPlayer", $player);
         }
         foreach ($this->generatorItems as $tick => $data) {
@@ -467,7 +465,7 @@ final class RushGame extends Game
     public function onTick(): void
     {
         if ($this->properties->getProperties("running")) {
-            foreach ($this->getPlayers() as $player) {
+            foreach ($this->players as $player) {
                 $player->getScoreboard()->addLine(0, $player, str_replace("{time}", $this->secondToTimer($this->time * 20), $player->getScoreboard()->getText(0)));
             }
             $this->time++;
@@ -596,7 +594,7 @@ final class RushGame extends Game
     {
         $this->properties->setProperties("running", false);
         $this->properties->setProperties("ending", true);
-        foreach ($this->getPlayers() as $player) {
+        foreach ($this->players as $player) {
             $this->processCallback("end", $player);
         }
         GameLoader::getInstance()->removeGame($this);

@@ -111,7 +111,6 @@ class PlayerListener implements Listener
                 }
                 $game->nextCheckpoint($player);
             } elseif ($block instanceof EndPlate) {
-                var_dump('a');
                 $game->finish($player);
             }
         }
