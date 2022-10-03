@@ -19,9 +19,9 @@ trait ConversionTrait
         }
         if($hour >= 1)
         {
-            return $this->timeToTwoChars($hour).":".$this->timeToTwoChars($minute).":".$this->timeToTwoChars($seconds);
+            return $this->timeToTwoChars($hour).":".$this->timeToTwoChars($minute).":".$this->timeToTwoChars($second);
         }
-        return $this->timeToTwoChars($minute).":".$this->timeToTwoChars($seconds);
+        return $this->timeToTwoChars($minute).":".$this->timeToTwoChars($second);
     }
 
     /**
@@ -31,7 +31,7 @@ trait ConversionTrait
      */
     protected function timeToTwoChars(int $time): string
     {
-        if($time > 10) return $time;
+        if($time >= 10) return $time;
         return "0$time";
     }
 }

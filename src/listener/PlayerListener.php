@@ -26,6 +26,7 @@ use Polaris\games\types\Jump;
 use Polaris\games\types\RushGame;
 use Polaris\item\Specialitem;
 use Polaris\player\PolarisPlayer;
+use Polaris\utils\GameUtils;
 
 class PlayerListener implements Listener
 {
@@ -35,7 +36,7 @@ class PlayerListener implements Listener
         $player = $event->getPlayer();
         if ($player instanceof PolarisPlayer) {
             $player->sendMessage("§l§b[§aPolaris§b] §aBienvenue sur Polaris !");
-            //$player->teleportToSpawn();
+            $player->teleportToSpawn();
         }
     }
 
@@ -49,7 +50,7 @@ class PlayerListener implements Listener
     {
         $player = $event->getPlayer();
         if (!$player instanceof PolarisPlayer) return;
-        if ($player->currentViewerPlayer != null) {
+        if ($player->currentViewerPlayer !== null) {
             $player->currentViewerPlayer->removeViewer($player);
             $player->teleportToSpawn();
         }

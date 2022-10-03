@@ -18,6 +18,8 @@ abstract class Game implements GameInterface{
      */
     public array $players = [];
 
+    private float $lastTick = 0;
+
     public GameProperties $properties;
 
     public function __construct(protected int $id, protected int $maxPlayer, protected int $time, protected string  $name = ""){
@@ -100,6 +102,15 @@ abstract class Game implements GameInterface{
 
     public function onTick(): void
     {
+        if($this->canTick())
+        {
+            $this->lastTick = microtime(true);
+        }
+    }
+
+    public function canTick(): bool
+    {
+        return $this->lastTick !== 0 && (microtime(true) - $this->lastTick) > 0.05;
     }
 
     public function onStart(): void

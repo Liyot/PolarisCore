@@ -12,6 +12,9 @@ class Scoreboard
 {
 
     private string $name;
+    /**
+     * @var $lines ScorePacketEntry[]
+     */
     private array $entries = [], $lines = [];
 
     public function __construct(string $name, array $entries = [])
@@ -67,6 +70,6 @@ class Scoreboard
 
     public function getText(int $line): string
     {
-        return $this->lines[$line] ?? "";
+        return $this->lines[$line]->customName ?? "";
     }
 }

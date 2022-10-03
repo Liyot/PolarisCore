@@ -26,6 +26,25 @@ class GameUtils{
         return Server::getInstance()->getWorldManager()->getWorldByName('PolarisSpawn');
     }
 
+    public static function PNGtoBYTES(string $path)
+    {
+        $img = @imagecreatefrompng($path);
+        $skinbytes = "";
+        list($width, $height) = @getimagesize($path);
+        for($y = 0; $y < $height; $y++){
+            for($x = 0; $x < $width; $x++){
+                $colorat = @imagecolorat($img, $x, $y);
+                $a = ((~((int)($colorat >> 24))) << 1) & 0xff;
+                $r = ($colorat >> 16) & 0xff;
+                $g = ($colorat >> 8) & 0xff;
+                $b = $colorat & 0xff;
+                $skinbytes .= chr($r) . chr($g) . chr($b) . chr($a);
+            }
+        }
+        @imagedestroy($img);
+        return $skinbytes;
+    }
+
     public const PROPERTIES_ACCEPT_PLAYERS = "acceptplayerwhenrunning";
 
 }

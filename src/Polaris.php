@@ -2,25 +2,16 @@
 
 namespace Polaris;
 
-use pocketmine\entity\Entity;
-use pocketmine\item\enchantment\StringToEnchantmentParser;
 use pocketmine\item\ItemFactory;
-use pocketmine\item\VanillaItems;
-use pocketmine\math\Vector3;
 use pocketmine\plugin\PluginBase;
-use pocketmine\scheduler\ClosureTask;
-use pocketmine\Server;
 use pocketmine\utils\SingletonTrait;
-use Polaris\command\Groups\GroupsCommand;
-use Polaris\entity\FloatingText;
-use Polaris\games\GameListener;
+use Polaris\cosmetics\CosmeticsManager;
 use Polaris\games\GameLoader;
-use Polaris\games\GameProperties;
 use Polaris\groups\Group;
 use Polaris\item\EnderPearl;
-use Polaris\listener\PacketListener;
-use Polaris\listener\PlayerListener;
+use Polaris\player\PolarisPlayer;
 use Polaris\task\ScoreboardTask;
+use Polaris\trait\ConversionTrait;
 use Polaris\trait\LoaderTrait;
 use Polaris\utils\GameUtils;
 
@@ -29,28 +20,21 @@ class Polaris extends PluginBase
 
     use LoaderTrait;
     use SingletonTrait;
+    use ConversionTrait;
 
     public static array $groups = [];
+    private int $time = 0;
 
     public function onEnable(): void
     {
-
         self::setInstance($this);
-
         $this->getServer()->getWorldManager()->loadWorld('PolarisSpawn');
-
         ItemFactory::getInstance()->register(new EnderPearl(), true);
-
         GameLoader::getInstance()->init();
-
-        $this->getServer()->getPluginManager()->registerEvents(new PacketListener(), $this);
-        $this->getServer()->getPluginManager()->registerEvents(new PlayerListener(), $this);
-        $this->getServer()->getPluginManager()->registerEvents(new GameListener(), $this);
-        $this->getServer()->getCommandMap()->register('', new GroupsCommand());
-
         $this->getScheduler()->scheduleRepeatingTask(new ScoreboardTask(), 20);
-
         $this->loadAll();
+
+        CosmeticsManager::getInstance()->getCosmetic("crown");
     }
 
     public function onDisable(): void
@@ -60,7 +44,9 @@ class Polaris extends PluginBase
         }
 
         foreach (GameUtils::getSpawnWorld()->getEntities() as $entity) {
-            $entity->close();
+            if(!$entity instanceof PolarisPlayer) $entity->close();
+
+            $this->getLogger()->notice("Closing entity of type {$entity->getId()}");
         }
     }
 

@@ -2,6 +2,7 @@
 
 namespace Polaris\player;
 
+use pocketmine\entity\Human;
 use pocketmine\entity\Location;
 use pocketmine\form\Form;
 use pocketmine\item\ItemIdentifier;
@@ -43,6 +44,8 @@ class PolarisPlayer extends Player
 
     public Game|null $actualGame = null;
 
+    private Human $linkedEntity;
+
     public bool $canDie = true;
 
     public bool $isRiding = false, $inGame = false;
@@ -73,10 +76,10 @@ class PolarisPlayer extends Player
         $this->properties = new PlayerProperties($this);
         $this->setScoreboard(PlayerUtils::getBaseScoreboard($this));
         $this->groupManager = new GroupManager($this);
-        /**$this->jumpText = new FloatingText(Location::fromObject(new Vector3(-51, 61, -65), GameUtils::getSpawnWorld()));
-        $this->jumpText->spawnTo($this);*/
+        $this->jumpText = new FloatingText(Location::fromObject(new Vector3(-51, 61, -65), GameUtils::getSpawnWorld()));
+        $this->jumpText->spawnTo($this);
 
-       // $this->setSpawn(new Position(-57, 60, -68, Server::getInstance()->getWorldManager()->getWorldByName("PolarisSpawn")));
+        $this->setSpawn(new Position(-57, 60, -68, Server::getInstance()->getWorldManager()->getWorldByName("PolarisSpawn")));
     }
 
     protected function entityBaseTick(int $tickDiff = 1): bool
@@ -150,16 +153,10 @@ class PolarisPlayer extends Player
 
     public function onUpdate(int $currentTick): bool
     {
-        /*$vector = 5;
-        for ($x = $vector; $x > 0; $x--){
-            for ($y = $vector; $y > 0; $y--){
-                $nbt = CompoundTag::create()->setString(Nameable::TAG_CUSTOM_NAME, $this->getName())
-                    ->setInt("pairx", $this->getPosition()->x + $x)
-                    ->setInt("pairy", $this->getPosition()->z + $y);
-                $this->getNetworkSession()->sendDataPacket(UpdateBlockPacket::create(BlockPosition::fromVector3($this->getPosition()->asVector3()->add($x, $y, 0)), RuntimeBlockMapping::getInstance()->toRuntimeId(VanillaBlocks::GLASS()->getFullId()), UpdateBlockPacket::FLAG_NETWORK, UpdateBlockPacket::DATA_LAYER_NORMAL));
-                $this->getNetworkSession()->sendDataPacket(BlockActorDataPacket::create(BlockPosition::fromVector3($this->getPosition()->asVector3()->add($x,$y,0)), new CacheableNbt($nbt)));
-            }
-        }*/
+        if(isset($this->linkedEntity))
+        {
+            $this->linkedEntity->location = $this->location;
+        }
 
         return parent::onUpdate($currentTick);
     }
@@ -172,7 +169,7 @@ class PolarisPlayer extends Player
 
     public function teleportToSpawn(): void
     {
-        //$this->teleport(new Position(-57, 60, -68, Server::getInstance()->getWorldManager()->getWorldByName("PolarisSpawn")));
+        $this->teleport(new Position(-57, 60, -68, Server::getInstance()->getWorldManager()->getWorldByName("PolarisSpawn")));
         $this->getInventory()->clearAll();
         $this->getArmorInventory()->clearAll();
         $this->giveHubStuff();
@@ -195,6 +192,11 @@ class PolarisPlayer extends Player
     public function getActualGame(): ?Game
     {
         return $this->actualGame;
+    }
+
+    public function link(Human $entity): void
+    {
+        $this->linkedEntity = $entity;
     }
 
     public function push(): void

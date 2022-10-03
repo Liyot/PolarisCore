@@ -53,11 +53,11 @@ trait VectorUtilsTrait
     public function copyWorld(string $from, string $name): string
     {
         $server = Server::getInstance();
-        @mkdir($server->getDataPath() . "/worlds/$name/", 0777);
-        @mkdir($server->getDataPath() . "/worlds/$name/db/", 0777);
-        copy($server->getDataPath() . "/worlds/" . $from . "/level.dat", $server->getDataPath() . "/worlds/$name/level.dat");
-        $oldWorldPath = $server->getDataPath() . "/worlds/$from/level.dat";
-        $newWorldPath = $server->getDataPath() . "/worlds/$name/level.dat";
+        @mkdir($server->getDataPath() . "worlds\\$name\\", 0777);
+        @mkdir($server->getDataPath() . "worlds\\$name\\db\\", 0777);
+        copy($server->getDataPath() . "worlds\\" . $from . "\\level.dat", $server->getDataPath() . "worlds\\$name\\level.dat");
+        $oldWorldPath = $server->getDataPath() . "worlds\\$from\\level.dat";
+        $newWorldPath = $server->getDataPath() . "worlds\\$name\\level.dat";
 
         $oldWorldNbt = new BedrockWorldData($oldWorldPath);
         $newWorldNbt = new BedrockWorldData($newWorldPath);
@@ -69,7 +69,7 @@ trait VectorUtilsTrait
         $nbt = new LittleEndianNbtSerializer();
         $buffer = $nbt->write(new TreeRoot($worldData));
         file_put_contents(Path::join($newWorldPath), Binary::writeLInt(BedrockWorldData::CURRENT_STORAGE_VERSION) . Binary::writeLInt(strlen($buffer)) . $buffer);
-        $this->copyDir($server->getDataPath() . "/worlds/" . $from . "/db", $server->getDataPath() . "/worlds/$name/db/");
+        $this->copyDir($server->getDataPath() . "\\worlds\\" . $from . "\\db", $server->getDataPath() . "\\worlds\\$name\\db\\");
         Server::getInstance()->getWorldManager()->loadWorld($name);
         return $name;
     }

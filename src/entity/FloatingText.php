@@ -32,16 +32,6 @@ class FloatingText extends Entity{
         parent::__construct($location, $nbt);
     }
 
-    public function onUpdate(int $currentTick): bool
-    {
-        if(GameLoader::getInstance()->tickerEntity->getLocation()->equals($this->getLocation())){
-            foreach (GameLoader::getGameList() as $game){
-                $game->onTick();
-            }
-        }
-        return parent::onUpdate($currentTick);
-    }
-
     protected function getInitialSizeInfo(): EntitySizeInfo
     {
         return new EntitySizeInfo(0.0, 0.0);

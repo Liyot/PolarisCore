@@ -39,13 +39,13 @@ final class VillagerEntity extends Living
         return parent::onInteract($player, $clickPos);
     }
 
-    protected function getInitialSizeInfo(): EntitySizeInfo
-    {
-        return $this->sizeInfo;
-    }
-
     public function getName(): string
     {
         return $this->name;
+    }
+
+    protected function getInitialSizeInfo(): EntitySizeInfo
+    {
+        return $this->sizeInfo;
     }
 }

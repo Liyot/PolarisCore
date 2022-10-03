@@ -4,35 +4,38 @@ namespace Polaris\trait;
 
 
 use pocketmine\block\BlockFactory;
-use pocketmine\block\utils\DyeColor;
-use pocketmine\block\VanillaBlocks;
-use pocketmine\color\Color;
 use pocketmine\data\bedrock\EntityLegacyIds as LegacyIds;
 use pocketmine\entity\EntityDataHelper;
 use pocketmine\entity\EntityFactory;
+use pocketmine\entity\EntitySizeInfo;
+use pocketmine\entity\Human;
 use pocketmine\entity\Location;
+use pocketmine\entity\Skin;
 use pocketmine\item\ItemIdentifier;
 use pocketmine\item\ItemIds;
 use pocketmine\item\VanillaItems;
+use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\protocol\types\entity\EntityIds;
-use pocketmine\Server;
+use pocketmine\scheduler\ClosureTask;
 use pocketmine\world\Position;
 use pocketmine\world\World;
 use Polaris\blocks\CustomPlate;
 use Polaris\blocks\EndPlate;
+use Polaris\command\cosmetics\CosmeticsCommand;
+use Polaris\command\groups\GroupsCommand;
+use Polaris\cosmetics\CosmeticsManager;
 use Polaris\entity\FloatingText;
 use Polaris\entity\PearlEntity;
 use Polaris\entity\ShulkerEntity;
-use Polaris\forms\menu\Button;
-use Polaris\forms\MenuForm;
-use Polaris\games\Game;
-use Polaris\games\Types\GetDown;
+use Polaris\entity\VillagerEntity;
+use Polaris\games\GameListener;
+use Polaris\games\GameLoader;
 use Polaris\games\types\RushGame;
-use Polaris\games\types\ShootCraft;
-use Polaris\groups\Group;
 use Polaris\item\ItemManager;
 use Polaris\item\Specialitem;
+use Polaris\listener\PacketListener;
+use Polaris\listener\PlayerListener;
 use Polaris\player\PolarisPlayer;
 use Polaris\Polaris;
 use Polaris\utils\FormReference;
@@ -50,6 +53,9 @@ trait LoaderTrait{
         $this->loadCustomGames();
         $this->loadEntity();
         $this->loadBlocks();
+        $this->launchTask();
+        $this->loadCommands();
+        $this->loadEvents();
     }
 
     //Todo: Try to found a way to manipulate the return value of the function.
@@ -65,6 +71,10 @@ trait LoaderTrait{
             return new FloatingText(EntityDataHelper::parseLocation($nbt, $world), $nbt);
         }, [EntityIds::FALLING_BLOCK]);
 
+        EntityFactory::getInstance()->register(VillagerEntity::class, function(World $world, CompoundTag $nbt) : VillagerEntity{
+            return new VillagerEntity(EntityDataHelper::parseLocation($nbt, $world), $nbt,new EntitySizeInfo(1.0, 1.0), function(){});
+        }, ['VillagerEntity']);
+
         EntityFactory::getInstance()->register(PearlEntity::class, function (World $world, CompoundTag $nbt): PearlEntity{
             return new PearlEntity(EntityDataHelper::parseLocation($nbt, $world), null, $nbt);
         }, ['ThrownEnderpearl', 'minecraft:ender_pearl'], LegacyIds::ENDER_PEARL);
@@ -72,7 +82,34 @@ trait LoaderTrait{
         EntityFactory::getInstance()->register(ShulkerEntity::class, function (World $world, CompoundTag $nbt): ShulkerEntity{
             return new ShulkerEntity(EntityDataHelper::parseLocation($nbt, $world), [false], null);
         }, ['ShulkerEntity'], LegacyIds::SHULKER_BULLET);
+        $a = true;
+        foreach (GameUtils::getSpawnWorld()->getEntities() as $entity)
+        {
+            if ($entity->getPosition()->equals(new Vector3(-73, 72, -68)))
+            {
+                $a = false;
+            }
+        }
+        if($a)
+        {
+            $path = Polaris::getInstance()->getDataFolder() . "image/logo10x10.png";
+            $json = file_get_contents(Polaris::getInstance()->getDataFolder(). "json/logo10x10.geo.json");
+            (new Human(new Location(-73, 72, -68, GameUtils::getSpawnWorld(), 0.0, 0.0),
+                new Skin("Logo", GameUtils::PNGtoBYTES($path), "", "geometry.unknown",$json)))->spawnToAll();
+        }
+    }
 
+    public function loadEvents(): void
+    {
+        $this->getServer()->getPluginManager()->registerEvents(new PacketListener(), $this);
+        $this->getServer()->getPluginManager()->registerEvents(new PlayerListener(), $this);
+        $this->getServer()->getPluginManager()->registerEvents(new GameListener(), $this);
+    }
+
+    public function loadCommands(): void
+    {
+        $this->getServer()->getCommandMap()->register('', new GroupsCommand());
+        $this->getServer()->getCommandMap()->register('', new CosmeticsCommand());
     }
 
     private function initManager(): void{
@@ -85,10 +122,12 @@ trait LoaderTrait{
                 $player->teleport($player->getActualGame()?->getCheckPoint($player));
             }),];
         new ItemManager($list);
+        new CosmeticsManager();
+
     }
 
     private function loadCustomGames(): void{
-        for($i = 0; $i != 15; $i++)
+        for($i = 0; $i !== 5; $i++)
         {
             new RushGame("1vs1", $i);
         }
@@ -97,10 +136,19 @@ trait LoaderTrait{
         }
 
         new ShootCraft();
-
+*/
         $blocks = ["-51:60:-62" => new CustomPlate(), "-53:60:-62" => new CustomPlate(),"-55:60:-62" => new CustomPlate() ,
             "-57:60:-62" => new CustomPlate(), "-59:60:-62" => new CustomPlate(), "-61:60:-62" => new CustomPlate(),
             "-63:60:-62" => new CustomPlate(), "-65:60:-62" => new EndPlate()];
         new Jump(2, 99999, PHP_INT_MAX,'Jump', new Position(-51, 61, -62, GameUtils::getSpawnWorld()), 5, $blocks);
-   */ }
+    }
+
+    public function launchTask(): void
+    {
+        Polaris::getInstance()->getScheduler()->scheduleRepeatingTask(new ClosureTask(function (){
+            foreach (GameLoader::getGameList() as $game){
+                $game->onTick();
+            }
+        }), 1);
+    }
 }

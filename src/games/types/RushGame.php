@@ -3,9 +3,9 @@
 namespace Polaris\games\types;
 
 use pocketmine\block\Bed;
-use pocketmine\block\Lava;
 use pocketmine\block\VanillaBlocks;
 use pocketmine\color\Color;
+use pocketmine\entity\EntitySizeInfo;
 use pocketmine\entity\Location;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
@@ -65,6 +65,11 @@ final class RushGame extends Game
 
     private World $world;
 
+    /**
+     * @var VillagerEntity[]
+     */
+    private array $villagers;
+
     private Queue $queue;
 
     /**
@@ -78,26 +83,31 @@ final class RushGame extends Game
 
     public function __construct(string $type, int $count)
     {
+
         $maxPlayer = match ($type) {
             self::GAME_1VS1 => 1,
             self::GAME_2VS2 => 4,
             self::GAME_4VS4 => 8,
         };
+
         $this->addTeam(new Team("Red", $maxPlayer), new Team("Blue", $maxPlayer));
+
         parent::__construct(GameUtils::ID_RUSHGAME, $maxPlayer, 0, "RushGame");
         GameLoader::getInstance()->addGame($this);
+
         $this->properties->setProperties("starting", true);
         $this->queue = new Queue($this->getName(), $maxPlayer, $this);
-        $this->world = Server::getInstance()->getWorldManager()->getWorldByName($this->copyWorld("RushPattern/RushFastPattern4vs4", "CurrentRush/Rush$type.$count")); //TODO generate suffix
-        /** @var VillagerEntity[] $villagers */
-        $villagers = [
+        $this->world = Server::getInstance()->getWorldManager()->getWorldByName($this->copyWorld("RushPattern\\RushFastPattern4vs4", "CurrentRush\\Rush$type.$count")); //TODO generate suffix
+
+        $this->villagers = [
             /**WARNING: va falloir modifier le yaw bien comme il faut, ça dépend de la map là
              *  J'utiliserais un autre méthode si possible
              *  ajouter un callback interact et tout à chaque VillagerEntity
+             *  Update: faut juste les faire fixer un point au centre de la map
              */
-            //new VillagerEntityEntity(Location::fromObject(new Vector3(0, 0, 0), $world, 0, 0), "terroriste", new EntitySizeInfo(0, 0), function(PolarisPlayer $player){}),
+           "terroriste" => new VillagerEntity(Location::fromObject(new Vector3(331, 52, 311), $this->world, 0, 0), "terroriste", new EntitySizeInfo(1.0, 1.0), function(PolarisPlayer $player){}),
         ];
-        foreach ($villagers as $villager) {
+        foreach ($this->villagers as $villager) {
             $villager->spawnToAll();
         }
         $this->forbiddenBlock = [
@@ -115,10 +125,10 @@ final class RushGame extends Game
         $this->generatorItems = [
             40 => [
                 [VanillaItems::BRICK(), [
-                    new Vector3(10, 10, 10),
-                    new Vector3(20, 10, 10),
-                    new Vector3(30, 10, 10),
-                    new Vector3(40, 10, 10),
+                    new Vector3(331, 52, 310),
+                    new Vector3(331, 52, 312),
+                    new Vector3(331, 52, 314),
+                    new Vector3(331, 52, 316),
                     new Vector3(50, 10, 10),
                 ],
                     //autres item à 40 ticks
@@ -130,15 +140,15 @@ final class RushGame extends Game
                 //les spawnpoints des teams
                 "TeamPosition" =>
                     [
-                        "Red" => new Vector3(50, 20, 10),
-                        "Blue" => new Vector3(50, 20, 10)
+                        "Red" => new Vector3(270, 53, 259),
+                        "Blue" => new Vector3(322, 53, 313)
                     ],
                 //la position des lits
                 "BedPosition" =>
                     [
                         // positions des lits des teams (bed & otherhalf)
-                        "Red" => [new Vector3(0, 0, 0), new Vector3(0, 0, 1)],
-                        "Blue" => [new Vector3(0, 0, 0), new Vector3(1, 0, 0)],
+                        "Red" => [new Vector3(270, 52, 258), new Vector3(270, 52, 259)],
+                        "Blue" => [new Vector3(324, 52, 313), new Vector3(233, 52, 313)],
                         /*
                          * lit bonus
                          * /En partant de la base des rouges, donc base rouge = 1
@@ -193,28 +203,36 @@ final class RushGame extends Game
                     "Blue" => 0,
                 ],
             ]);
+
         $this->addCallback("GeneratorsTnt", function (string $team) {
             $this->processCallBack("ItemGenerator", VanillaBlocks::TNT()->asItem(), $this->properties->getPropertiesList()["GameInfo"]["GeneratorsTnt"][$team], 20 * 60, true);
         });
+
         $this->addCallback("ItemGenerator", function (Item $item, array $vectors, int $tick, bool $spawnWhenCalled = false) {
             if ($spawnWhenCalled) {
                 foreach ($vectors as $vector3) {
                     if (!$vector3 instanceof Vector3) continue;
-                    $this->getWorld()->dropItem($vector3, VanillaBlocks::TNT()->asItem(), new Vector3(0, 0.2, 0));
+                    $this->getWorld()->dropItem($vector3, $item, new Vector3(0, 0.2, 0));
                 }
             }
-            Polaris::getInstance()->getScheduler()->scheduleRepeatingTask(new ClosureTask(function () use ($vectors) {
+            Polaris::getInstance()->getScheduler()->scheduleRepeatingTask(new ClosureTask(function () use ($item, $vectors) {
                 foreach ($vectors as $vector3) {
                     if (!$vector3 instanceof Vector3) continue;
-                    $this->getWorld()->dropItem($vector3, VanillaBlocks::TNT()->asItem(), new Vector3(0, 0.2, 0));
+                    $this->getWorld()->dropItem($vector3, $item, new Vector3(0, 0.2, 0));
                 }
             }), $tick);
         });
+
         $this->addCallback("LoadPlayer", function (PolarisPlayer $player) {
             $player->setHealth(20);
-            $player->setAbsorption($this->properties->getProperties("GameInfo")["TeamAbsorption"][$player->getTeam()->getName()] ? null : 0);
-            $player->teleport(Location::fromObject($this->properties->getProperties("GameInfo")["TeamPosition"][$player->getTeam()->getName()], $this->getWorld()));
+            $this->sendScoreboard($player);
+            $player->setAbsorption($this->properties->getProperties("GameInfo")["TeamAbsorption"][$player->getTeam()?->getName()] ? null : 0);
+            $pos = $this->properties->getProperties("GameInfo")["TeamPosition"][$player->getTeam()?->getName()];
+            $this->getWorld()->loadChunk($pos->x, $pos->z);
+            $player->teleport(Location::fromObject($pos, $this->getWorld()));
             $sword = VanillaItems::IRON_SWORD();
+
+
             /** @var Armor[] $armors */
             $armors = [ //TODO: check enchantment
                 VanillaItems::LEATHER_CAP(),
@@ -222,6 +240,7 @@ final class RushGame extends Game
                 VanillaItems::LEATHER_PANTS(),
                 VanillaItems::LEATHER_BOOTS()
             ];
+
             //TODO: atout (genre 16 blocks dès le départ)
             $flint = VanillaItems::FLINT_AND_STEEL();
             $player->getInventory()->setItem(0, $sword);
@@ -240,6 +259,7 @@ final class RushGame extends Game
                     $player->getArmorInventory()->setBoots($armors[3]->setCustomColor(new Color(0x3c, 0x44, 0xaa)));
                     break;
             }
+
             $delay = 5;
             Polaris::getInstance()->getScheduler()->scheduleDelayedTask(new ClosureTask(function () use ($player, $sword, $delay): void {
                 if ($delay <= 0) {
@@ -252,6 +272,7 @@ final class RushGame extends Game
                 $delay--;
             }), 5 * 20);
         });
+
         $this->addCallback("TeamBedExplode", function (PolarisPlayer $player, Bed $block) {
             switch ($player->getTeam()->getName()) {
                 case "Red":
@@ -347,12 +368,12 @@ final class RushGame extends Game
         });
         $this->addCallback("initGame", function () {
             foreach ($this->getTeams() as $team) {
-                if (count($team->getPlayers()) == 0) {
+                if (count($team->getPlayers()) === 0) {
                     foreach ($team->getPlayers() as $player) {
                         $player->sendTitle("§aPerdu !", "Votre équipe a perdu.", -1, 20, 20 * 2);
                     }
                     foreach ($this->players as $player) {
-                        if ($player->getTeam()->getName() != $team->getName()) {
+                        if ($player->getTeam()?->getName() !== $team->getName()) {
                             $player->sendTitle("§6Victoire !", "Votre équipe a gagné !", -1, 20, 20 * 2);
                         }
                     }
@@ -401,6 +422,7 @@ final class RushGame extends Game
                         $player->setTeam($this->getTeam("Blue"));
                         $player->inGame = true;
                         $player->getInventory()->clearAll();
+                        var_dump('a');
                         $this->properties->setNestedProperties("GameInfo.Players." . $player->getName(), ["kill" => 0, "death" => 0]);
                         $player->actualGame = $this;
                         $player->hasAccepted[$this->getName()] = false;
@@ -455,6 +477,7 @@ final class RushGame extends Game
         foreach ($this->players as $player) {
             $this->processCallback("LoadPlayer", $player);
         }
+
         foreach ($this->generatorItems as $tick => $data) {
             foreach ($data as $datum => $item) {
                 $this->processCallBack("ItemGenerator", $item[0], $item[1], $tick);
@@ -464,12 +487,15 @@ final class RushGame extends Game
 
     public function onTick(): void
     {
-        if ($this->properties->getProperties("running")) {
-            foreach ($this->players as $player) {
-                $player->getScoreboard()->addLine(0, $player, str_replace("{time}", $this->secondToTimer($this->time * 20), $player->getScoreboard()->getText(0)));
+        if($this->canTick()) {
+            if ($this->properties->getProperties("running")) {
+                foreach ($this->players as $player) {
+                    $player->getScoreboard()->addLine(0, $player, str_replace("{time}", $this->secondToTimer($this->time / 20), $this->getScoreboardLine()[0]));
+                }
+                $this->time++;
             }
-            $this->time++;
         }
+        parent::onTick();
     }
 
     private function initListeners(): array
@@ -506,21 +532,21 @@ final class RushGame extends Game
                         $event->setBlockList(array_diff([$block->getOtherHalf()], $event->getBlockList()));
                         switch (array_keys($properties)) {
                             case "Base2":
-                                $player->setAbsorption($player->getAbsorption() + (float)$properties["Base2"][$player->getTeam()->getName()][0]);
+                                $player->setAbsorption($player->getAbsorption() + (float)$properties["Base2"][$player->getTeam()?->getName()][0]);
                                 foreach ($this->getWorld()->getPlayers() as $p) {
                                     $p->sendMessage($player->getName() . "a explosé un lit et octroie un bonus de " . (float)$properties["Base7"][$player->getTeam()->getName()][0] . " ❤ à son équipe");
                                 }
-                                if ($properties["Base2"][$player->getTeam()->getName()][1] != null) {
-                                    $this->processCallBack("GeneratorsTnt", $player->getTeam()->getName());
+                                if ($properties["Base2"][$player->getTeam()?->getName()][1] !== null) {
+                                    $this->processCallBack("GeneratorsTnt", $player->getTeam()?->getName());
                                 }
                                 break;
                             case "Base3":
-                                $player->setAbsorption($player->getAbsorption() + (float)$properties["Base3"][$player->getTeam()->getName()][0]);
+                                $player->setAbsorption($player->getAbsorption() + (float)$properties["Base3"][$player->getTeam()?->getName()][0]);
                                 foreach ($this->getWorld()->getPlayers() as $p) {
                                     $p->sendMessage($player->getName() . "a explosé un lit et octroie un bonus de " . (float)$properties["Base7"][$player->getTeam()->getName()][0] . " ❤ à son équipe");
                                 }
-                                if ($properties["Base3"][$player->getTeam()->getName()][1] != null) {
-                                    $this->processCallBack("GeneratorsTnt", $player->getTeam()->getName());
+                                if ($properties["Base3"][$player->getTeam()?->getName()][1] !== null) {
+                                    $this->processCallBack("GeneratorsTnt", $player->getTeam()?->getName());
                                 }
                                 break;
                             case "Base4":
@@ -528,8 +554,8 @@ final class RushGame extends Game
                                 foreach ($this->getWorld()->getPlayers() as $p) {
                                     $p->sendMessage($player->getName() . "a explosé un lit et octroie un bonus de " . (float)$properties["Base7"][$player->getTeam()->getName()][0] . " ❤ à son équipe");
                                 }
-                                if ($properties["Base4"][$player->getTeam()->getName()][1] != null) {
-                                    $this->processCallBack("GeneratorsTnt", $player->getTeam()->getName());
+                                if ($properties["Base4"][$player->getTeam()?->getName()][1] !== null) {
+                                    $this->processCallBack("GeneratorsTnt", $player->getTeam()?->getName());
                                 }
                                 break;
                             case "Base5":
@@ -537,8 +563,8 @@ final class RushGame extends Game
                                 foreach ($this->getWorld()->getPlayers() as $p) {
                                     $p->sendMessage($player->getName() . "a explosé un lit et octroie un bonus de " . (float)$properties["Base7"][$player->getTeam()->getName()][0] . " ❤ à son équipe");
                                 }
-                                if ($properties["Base5"][$player->getTeam()->getName()][1] != null) {
-                                    $this->processCallBack("GeneratorsTnt", $player->getTeam()->getName());
+                                if ($properties["Base5"][$player->getTeam()?->getName()][1] !== null) {
+                                    $this->processCallBack("GeneratorsTnt", $player->getTeam()?->getName());
                                 }
                                 break;
                             case "Base6":
@@ -546,8 +572,8 @@ final class RushGame extends Game
                                 foreach ($this->getWorld()->getPlayers() as $p) {
                                     $p->sendMessage($player->getName() . "a explosé un lit et octroie un bonus de " . (float)$properties["Base7"][$player->getTeam()->getName()][0] . " ❤ à son équipe");
                                 }
-                                if ($properties["Base6"][$player->getTeam()->getName()][1] != null) {
-                                    $this->processCallBack("GeneratorsTnt", $player->getTeam()->getName());
+                                if ($properties["Base6"][$player->getTeam()?->getName()][1] !== null) {
+                                    $this->processCallBack("GeneratorsTnt", $player->getTeam()?->getName());
                                 }
                                 break;
                             case "Base7":
@@ -623,5 +649,10 @@ final class RushGame extends Game
     public function getDeathPlayer(string $uuid): ?PolarisPlayer
     {
         return $this->deadPlayers[$uuid] ?? null;
+    }
+
+    public function getVillagers(): array
+    {
+        return $this->villagers;
     }
 }
