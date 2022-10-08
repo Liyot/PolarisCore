@@ -33,8 +33,6 @@ class Polaris extends PluginBase
         GameLoader::getInstance()->init();
         $this->getScheduler()->scheduleRepeatingTask(new ScoreboardTask(), 20);
         $this->loadAll();
-
-        CosmeticsManager::getInstance()->getCosmetic("crown");
     }
 
     public function onDisable(): void

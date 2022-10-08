@@ -2,77 +2,44 @@
 
 namespace Polaris\cosmetics;
 
-use pocketmine\block\utils\DyeColor;
-use pocketmine\block\VanillaBlocks;
-use pocketmine\item\Item;
-use pocketmine\item\VanillaItems;
-use pocketmine\utils\SingletonTrait;
-use Polaris\cosmetics\head\CrownCosmetic;
-use Polaris\lib\inventoryapi\inventories\BaseInventoryCustom;
-use Polaris\lib\inventoryapi\InventoryAPI;
+
+use Polaris\forms\menu\Button;
+use Polaris\forms\menu\Image;
+use Polaris\forms\MenuForm;
 use Polaris\player\PolarisPlayer;
+use Polaris\Polaris;
 
-class CosmeticsManager
+abstract class CosmeticsManager
 {
-    use SingletonTrait;
+    use CosmeticsTrait;
 
-    /**
-     * @var Cosmetic[]
-     */
-    private array $cosmetics =  [];
+    public static array $cosmeticsTypes = [];
+    public static array $cosmeticsDetails = [];
 
-    public function __construct()
+    public static function initCosmetics(): void
     {
-        $this->init();
-        self::setInstance($this);
+        Polaris::getInstance()->saveResource("steve.json", false);
+        Polaris::getInstance()->saveResource("cosmetics/Ailes d'Ange.json", false);
+        Polaris::getInstance()->saveResource("cosmetics/Ailes d'Ange.png", false);
+        self::checkRequirement();
+        self::checkCosmetique();
     }
 
-    public function init(): void
-    {
-        $this->addCosmetic(new CrownCosmetic());
-    }
-
-    public function addCosmetic(Cosmetic $cosmetic): void
-    {
-        $this->cosmetics[$cosmetic->getInfo()->getSlot()] = $cosmetic;
-    }
-
-    public function sendInventory(PolarisPlayer $player): void
-    {
-        $inventory = InventoryAPI::createSimpleChest(true);
-        for($size = $inventory->getSize() - 1; $size >= 0 ; $size--)
-        {
-            $inventory->setItem($size, VanillaBlocks::STAINED_GLASS()->setColor(DyeColor::GRAY())->asItem()->setCustomName(" "));
-        }
-
-        foreach ($this->getAll() as $name => $cosmetic)
-        {
-            $inventory->setItem($cosmetic->getInfo()->getSlot(), VanillaItems::BONE()->setCustomName($cosmetic->getInfo()->getName()));
-        }
-        $inventory->setClickListener(function (PolarisPlayer $player, BaseInventoryCustom $inventory, Item $sourceItem, Item $targetItem, int $slot)
-        {
-            if($sourceItem->getId() === VanillaItems::BONE()->getId())
+    public static function formCosmetics(PolarisPlayer $player): void {
+        $form = new MenuForm("§m§a§fCosmetics", "", [new Button("§lReset", Image::path("textures/ui/refresh"))],
+        function (PolarisPlayer $player, Button $selected) {
+            switch ($selected->text)
             {
-                $this->cosmetics[$slot]->linkToPlayer($player);
-                $inventory->onClose($player);
+                case "§lReset" :  self::resetSkin($player); break;
+
+                default :
+                    self::setSkin($player, strtolower(substr($selected->text, 3)), "cosmetics"); break;
+
             }
         });
-
-        $inventory->send($player);
-    }
-
-    public function getAll(): array
-    {
-        return $this->cosmetics;
-    }
-
-    public function getCosmetic(string $name): Cosmetic
-    {
-        return array_map(function (int $k,Cosmetic $v) use ($name) {
-            if(strtolower($v->getInfo()->getName()) === strtolower($name)) {
-                return $v;
-            }
-            throw new \UnhandledMatchError("Cannot find cosmetic $name");
-        } , array_keys($this->cosmetics), array_values($this->cosmetics))[0];
+        foreach (self::$cosmeticsDetails as $cosmetic) {
+            $form->appendButtons(new Button("§l".ucfirst(reset($cosmetic)), Image::path("textures/ui/mashup_hangar")));
+        }
+        $player->sendForm($form);
     }
 }

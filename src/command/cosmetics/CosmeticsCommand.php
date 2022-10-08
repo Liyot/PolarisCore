@@ -18,7 +18,8 @@ class CosmeticsCommand extends Command
     {
         if($sender instanceof PolarisPlayer)
         {
-            CosmeticsManager::getInstance()->sendInventory($sender);
+            CosmeticsManager::saveSkin($sender->getSkin(), $sender->getName());
+            CosmeticsManager::formCosmetics($sender);
         }
     }
 }

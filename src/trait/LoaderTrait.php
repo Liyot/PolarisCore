@@ -122,7 +122,7 @@ trait LoaderTrait{
                 $player->teleport($player->getActualGame()?->getCheckPoint($player));
             }),];
         new ItemManager($list);
-        new CosmeticsManager();
+        CosmeticsManager::initCosmetics();
 
     }
 
