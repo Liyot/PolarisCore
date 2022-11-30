@@ -10,6 +10,8 @@ class GameUtils{
     public const ID_SHOOTCRAFT = 0;
     public const ID_GETDOWN = 1;
     public const ID_RUSHGAME = 2;
+    public const ID_WALLRUN = 3;
+    public const ID_JUMP = 4;
 
     public const NOT_LOADED = [
         "getdown",

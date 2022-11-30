@@ -2,9 +2,9 @@
 <project version="4">
   <component name="PhpIncludePathManager">
     <include_path>
-      <path value="$PROJECT_DIR$/../../../../PocketMine-MP/resources" />
-      <path value="$PROJECT_DIR$/../../../../PocketMine-MP/src" />
-      <path value="$PROJECT_DIR$/../../../../PocketMine-MP/vendor" />
+      <path value="$PROJECT_DIR$/../../../API/resources" />
+      <path value="$PROJECT_DIR$/../../../API/src" />
+      <path value="$PROJECT_DIR$/../../../API/vendor" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.0">

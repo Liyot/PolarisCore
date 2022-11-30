@@ -4,6 +4,7 @@ namespace Polaris\games;
 
 use pocketmine\player\GameMode;
 use pocketmine\utils\Utils;
+use Polaris\games\lobby\WaitingLobby;
 use Polaris\player\PolarisPlayer;
 use Polaris\trait\callBackTrait;
 use Polaris\utils\PlayerUtils;
@@ -20,10 +21,18 @@ abstract class Game implements GameInterface{
 
     private float $lastTick = 0;
 
+    public WaitingLobby $lobby;
+
     public GameProperties $properties;
 
-    public function __construct(protected int $id, protected int $maxPlayer, protected int $time, protected string  $name = ""){
+    public function __construct(protected int $id, protected int $maxPlayer, protected int $time, protected string  $name = "")
+    {
+        if(!$this instanceof MinorGameInterface)
+        {
+            $this->lobby = new WaitingLobby();
+        }
         $this->initProperties();
+        $this->initListeners();
     }
 
     public function getName(): string
@@ -31,20 +40,32 @@ abstract class Game implements GameInterface{
         return $this->name;
     }
 
-    public function join(PolarisPlayer $player): void{
-        $player->setGamemode(GameMode::SURVIVAL());
-        $player->sendMessage("§l§b[§a{$this->getName()}§b] §aVous avez rejoint le {$this->getName()} !");
-        $this->players[$player->getUniqueId()->toString()] = $player;
-        $player->inGame = true;
-        $player->getInventory()->clearAll();
-        $this->sendScoreboard($player);
-        $player->actualGame = $this;
-        $player->hasAccepted[$this->getName()] = false;
+    public function join(PolarisPlayer $player): void
+    {
+        if(isset($this->lobby))
+        {
+            $this->lobby->join($player);
+        }else
+        {
+            $player->setGamemode(GameMode::SURVIVAL());
+            $player->sendMessage("§l§b[§a{$this->getName()}§b] §aVous avez rejoint le {$this->getName()} !");
+            $this->players[$player->getUniqueId()->toString()] = $player;
+            $player->inGame = true;
+            $player->getInventory()->clearAll();
+            $this->sendScoreboard($player);
+            $player->actualGame = $this;
+            $player->hasAccepted[$this->getName()] = false;
+        }
     }
 
+
+    public function getLobby(): WaitingLobby
+    {
+        return $this->lobby;
+    }
     public function preJoin(PolarisPlayer $player): void{
         if($player->canJoin($this) && count($this->getPlayers()) < $this->getMaxPlayers()){
-            $this->join($player);
+            $this->lobby->join($player);
         }else{
             $player->push();
             PlayerUtils::sendVerification($player, function (PolarisPlayer $player){
@@ -62,8 +83,7 @@ abstract class Game implements GameInterface{
             $player->actualGame = null;
             $player->hasAccepted[$this->getName()] = false;
             $player->setScoreboard(PlayerUtils::getBaseScoreboard($player));
-            $player->sendMessage("§l§b[§{$this->getName()}§b] §aVous avez quitté le {$this->getName()} !");
-            $player->teleportToSpawn();
+            $player->sendMessage("§l§b[§a{$this->getName()}§b] §aVous avez quitté le {$this->getName()} !");
         }
     }
 
@@ -129,4 +149,6 @@ abstract class Game implements GameInterface{
     public function onStop(): void
     {
     }
+
+    abstract protected function initListeners(): void;
 }

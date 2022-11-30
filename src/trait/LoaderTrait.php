@@ -114,8 +114,8 @@ trait LoaderTrait{
 
     private function initManager(): void{
         $list = [new Specialitem( new ItemIdentifier(ItemIds::BOOK, 0), "Book", function (PolarisPlayer $player){
-            $player->sendForm(FormReference::MDJForm($player));
-        }),  new Specialitem(new ItemIdentifier(VanillaItems::RED_DYE()->getId(), VanillaItems::RED_DYE()->getMeta()), VanillaItems::RED_DYE()->getName(), function (PolarisPlayer $player){
+            $player->sendForm(FormReference::MDJForm());
+        }),  new Specialitem(new ItemIdentifier(VanillaItems::RED_DYE()->getId(), 1), VanillaItems::RED_DYE()->getName(), function (PolarisPlayer $player){
             $player->getActualGame()?->leave($player);
         }),
             new Specialitem(new ItemIdentifier(351, 2), VanillaItems::GREEN_DYE()->getName(), function (PolarisPlayer $player){
@@ -131,16 +131,15 @@ trait LoaderTrait{
         {
             new RushGame("1vs1", $i);
         }
-      /**  for ($x = 6; $x > 0; $x--){
-            new GetDown("getdownnn");
-        }
-
-        new ShootCraft();
-*/
+        /**for ($x = 6; $x > 0; $x--){
+         * new GetDown("getdownnn");=
+         * }
+         * new ShootCraft();
+         */
         $blocks = ["-51:60:-62" => new CustomPlate(), "-53:60:-62" => new CustomPlate(),"-55:60:-62" => new CustomPlate() ,
             "-57:60:-62" => new CustomPlate(), "-59:60:-62" => new CustomPlate(), "-61:60:-62" => new CustomPlate(),
             "-63:60:-62" => new CustomPlate(), "-65:60:-62" => new EndPlate()];
-        new Jump(2, 99999, PHP_INT_MAX,'Jump', new Position(-51, 61, -62, GameUtils::getSpawnWorld()), 5, $blocks);
+        new Jump(99999, PHP_INT_MAX, 8, new Position(-51, 61, -62, GameUtils::getSpawnWorld()), $blocks);
     }
 
     public function launchTask(): void

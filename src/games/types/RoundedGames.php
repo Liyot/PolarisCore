@@ -60,7 +60,7 @@ abstract class RoundedGames extends Game implements ZoneGame
         $this->addCallback('Start', function (){
             $this->initProperties();
             $this->properties->setProperties('Starting', false)->setProperties('Running', true);
-            $this->initListener();
+            $this->initListeners();
             foreach ($this->getPlayers() as $player){
                 $player->canDie = true;
             }
@@ -168,5 +168,5 @@ abstract class RoundedGames extends Game implements ZoneGame
         $this->processCallback("Stop", Server::getInstance());
     }
 
-    abstract public function initListener(): void;
+    abstract public function initListeners(): void;
 }

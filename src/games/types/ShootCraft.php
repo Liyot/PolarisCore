@@ -2,19 +2,27 @@
 
 namespace Polaris\games\types;
 
+use pocketmine\entity\Location;
+use pocketmine\event\player\PlayerItemUseEvent;
+use pocketmine\item\ItemIds;
 use pocketmine\item\VanillaItems;
 use pocketmine\Server;
 use pocketmine\world\Position;
+use Polaris\entity\ShulkerEntity;
 use Polaris\games\Game;
 use Polaris\games\GameLoader;
 use Polaris\games\Zone;
 use Polaris\player\PolarisPlayer;
 use Polaris\utils\GameUtils;
+use Polaris\utils\ListenerUtils;
 
-class ShootCraft extends Game implements ZoneGame
+
+final class ShootCraft extends Game implements ZoneGame
 {
 
     private Zone $zone;
+
+    private array $cooldown = [];
 
     public function __construct()
     {
@@ -43,6 +51,32 @@ class ShootCraft extends Game implements ZoneGame
         });
         parent::__construct(GameUtils::ID_SHOOTCRAFT, PHP_INT_MAX, PHP_INT_MAX, "ShootCraft");
         $this->onCreation();
+    }
+
+    protected function initListeners(): void
+    {
+        $this->addCallback(ListenerUtils::PLAYER_ITEM_USE, function (PlayerItemUseEvent $event)
+        {
+            $player = $event->getPlayer();
+            $item = $event->getItem();
+            if ($player instanceof PolarisPlayer) {
+                if ($player->getActualGame() instanceof ShootCraft) {
+                    if ($item->getId() === ItemIds::STICK) {
+                        $cooldown = $this->cooldown[$player->getName()] ?? 0;
+                        if ($cooldown < time()) {
+                            $location = Location::fromObject($player->getLocation()->add(0, 1, 0), $player->getWorld(), $player->getLocation()->yaw);
+                            $entity = new ShulkerEntity($location, [false, "game" => $player->getActualGame()]);
+                            $entity->spawnToAll();
+                            $this->cooldown[$player->getName()] = time() + 5;
+                            $entity->setMotion($player->getDirectionVector());
+                        } else {
+                            $event->cancel();
+                            $player->sendMessage("§cVous ne pouvez pas utiliser cette arme pour le moment");
+                        }
+                    }
+                }
+            }
+        });
     }
 
     public function getZone(): Zone

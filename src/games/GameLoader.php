@@ -29,6 +29,8 @@ class GameLoader{
 
     public array $gameCount = [];
 
+    public array $lobby = [];
+
     /**
      * @var PolarisPlayer[]
      */
@@ -64,7 +66,7 @@ class GameLoader{
     public function init(): void
     {
         self::registerGame();
-        if(Server::getInstance()->getWorldManager()->getWorldByName("PolarisSpawn") == null) return;
+        if(Server::getInstance()->getWorldManager()->getWorldByName("PolarisSpawn") === null) return;
         $this->tickerEntity = new FloatingText(new Location(-63, 60, -68, Server::getInstance()->getWorldManager()->getWorldByName("PolarisSpawn"), 0, 0));
         $this->tickerEntity->setText("Bienvenue sur Polaris !");
         $this->tickerEntity->spawnToAll();
@@ -90,6 +92,7 @@ class GameLoader{
         }
     }
 
+
     public function getDisponibleGame(string $name): Game{
         foreach (self::$game as $game){
             if($game instanceof RoundedGames && str_contains($game->getName(), $name)){
@@ -110,6 +113,7 @@ class GameLoader{
     {
         $name = strtolower($game->getName());
         $this->addCount($game);
+        $game instanceof MinorGameInterface ?: $this->LobbyCount[] = $game->getLobby();
         Server::getInstance()->getLogger()->notice(TextFormat::DARK_AQUA."[GAME] §aAdding game: " . $game->getName()."-". $this->gameCount[$name]);
         self::$game[$name."-".$this->gameCount[$name]] = $game;
     }

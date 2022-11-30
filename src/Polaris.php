@@ -3,6 +3,7 @@
 namespace Polaris;
 
 use pocketmine\item\ItemFactory;
+use pocketmine\item\VanillaItems;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\SingletonTrait;
 use Polaris\cosmetics\CosmeticsManager;

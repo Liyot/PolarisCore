@@ -6,6 +6,7 @@ use GdImage;
 use pocketmine\entity\Skin;
 use Polaris\player\PolarisPlayer;
 use Polaris\Polaris;
+use raklib\generic\SendReliabilityLayer;
 
 trait CosmeticsTrait
 {
@@ -25,7 +26,6 @@ trait CosmeticsTrait
                 }
                 foreach ($checkFileAvailable as $value) {
                     if (!in_array($value . ".png", $allFiles, true)) {
-                        var_dump($value);
                         unset($checkFileAvailable[array_search($value, $checkFileAvailable, true)]);
                     }
                 }
@@ -36,6 +36,20 @@ trait CosmeticsTrait
         }
         unset(CosmeticsManager::$cosmeticsTypes[0], CosmeticsManager::$cosmeticsTypes[1], CosmeticsManager::$cosmeticsTypes[array_search("saveskin", CosmeticsManager::$cosmeticsTypes, true)], CosmeticsManager::$cosmeticsDetails["."], CosmeticsManager::$cosmeticsDetails[".."], CosmeticsManager::$cosmeticsDetails["saveskin"]);
         sort(CosmeticsManager::$cosmeticsTypes);
+    }
+
+    private static function PNGtoBYTES($path) : string
+    {
+        $img = @imagecreatefrompng($path);
+        $bytes = "";
+        for ($y = 0; $y < (int)@getimagesize($path)[1]; $y++) {
+            for ($x = 0; $x < (int)@getimagesize($path)[0]; $x++) {
+                $rgba = @imagecolorat($img, $x, $y);
+                $bytes .= chr(($rgba >> 16) & 0xff) . chr(($rgba >> 8) & 0xff) . chr($rgba & 0xff) . chr(((~((int)($rgba >> 24))) << 1) & 0xff);
+            }
+        }
+        @imagedestroy($img);
+        return $bytes;
     }
 
     private static function checkRequirement(): void
@@ -112,7 +126,7 @@ trait CosmeticsTrait
             $size = 64;
         }
         $skinbytes = self::getSkinBytes($path, $size);
-        $player->setSkin(new Skin($skin->getSkinId(), $skinbytes, "", "geometry.humanoid.custom", file_get_contents(Polaris::getInstance()->getDataFolder() . "steve.json")));
+        $player->setSkin(new Skin($skin->getSkinId(), $skinbytes, "", "geometry.unknown", file_get_contents(Polaris::getInstance()->getDataFolder() . "steve.json")));
         $player->sendSkin();
     }
 

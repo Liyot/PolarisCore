@@ -3,10 +3,13 @@
 namespace Polaris\listener;
 
 use pocketmine\block\VanillaBlocks;
+use pocketmine\entity\Location;
+use pocketmine\entity\object\ItemEntity;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\event\entity\EntityItemPickupEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerCreationEvent;
 use pocketmine\event\player\PlayerEntityInteractEvent;
@@ -16,6 +19,9 @@ use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
+use pocketmine\item\VanillaItems;
+use pocketmine\math\Vector3;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\protocol\ModalFormRequestPacket;
 use pocketmine\network\mcpe\protocol\ModalFormResponsePacket;
 use pocketmine\Server;
@@ -24,9 +30,11 @@ use Polaris\blocks\EndPlate;
 use Polaris\games\GameLoader;
 use Polaris\games\types\Jump;
 use Polaris\games\types\RushGame;
+use Polaris\games\types\TimedGames;
 use Polaris\item\Specialitem;
 use Polaris\player\PolarisPlayer;
 use Polaris\utils\GameUtils;
+use Polaris\utils\PlayerUtils;
 
 class PlayerListener implements Listener
 {
@@ -96,7 +104,7 @@ class PlayerListener implements Listener
     {
         $player = $event->getPlayer();
         if ($player instanceof PolarisPlayer) {
-            if ($player->getPosition()->y <= 0) {
+            if ($player->getPosition()->y <= 0 && is_null($player->getActualGame())) {
                 $player->teleportToSpawn();
             }
             $block = $player->getWorld()->getBlock($player->getPosition(), false, false);
@@ -104,7 +112,7 @@ class PlayerListener implements Listener
             if ($block instanceof CustomPlate) {
                 if (!$game instanceof Jump) {
                     foreach (GameLoader::getGameList() as $game) {
-                        if ($game instanceof Jump && $game->pos->distance($player->getPosition()) <= 1.5) {
+                        if ($game instanceof TimedGames && $game->pos->distance($player->getPosition()) <= 1.5 & $game->pos->world === $player->getWorld()) {
                             $game->join($player);
                         }
                     }
@@ -112,7 +120,10 @@ class PlayerListener implements Listener
                 }
                 $game->nextCheckpoint($player);
             } elseif ($block instanceof EndPlate) {
-                $game->finish($player);
+                if($game instanceof TimedGames)
+                {
+                    $game->finish($player);
+                }
             }
         }
     }
@@ -160,7 +171,7 @@ class PlayerListener implements Listener
         $item = $event->getItem();
         $player = $event->getPlayer();
         if (!$player instanceof PolarisPlayer) return;
-        if ($item->getId() == 1) {
+        if ($item->getId() === 1) {
             GameLoader::getInstance()->getDisponibleGame("RushGame")->preJoin($player);
         }
         if ($item instanceof Specialitem) {

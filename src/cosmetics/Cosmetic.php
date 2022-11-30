@@ -46,7 +46,6 @@ class Cosmetic
      */
     public function linkToPlayer(PolarisPlayer $player)
     {
-        var_dump($this->generateSkin());
         $entity = new Human($player->getLocation(), $this->generateSkin());
         $entity->spawnToAll();
         $packet = SetActorLinkPacket::create(new EntityLink($player->getId(), $entity->getId(), EntityLink::TYPE_RIDER, true, true));

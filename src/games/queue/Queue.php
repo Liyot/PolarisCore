@@ -54,7 +54,7 @@ final class Queue{
             if($this->game->properties->getProperties("starting")){
                 if(count($this->game->getPlayers()) < $this->game->getMaxPlayers()){
                     $player = array_shift($this->players);
-                    $this->game->join($player);
+                    $this->game->getLobby()->join($player);
                 }else{
                     foreach ($this->players as $place => $player){
                         $player->sendPopup($place + 1 . "/" . count($this->players));
