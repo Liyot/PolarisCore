@@ -5,8 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3b300346-49f2-42b5-b0cf-11f81a8ef803" name="Changes" comment="Rush, WaitingLobby, Wallrun, fix jump, cosmetics">
-      <change beforePath="$PROJECT_DIR$/src/Polaris.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Polaris.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/games/lobby/WaitingLobby.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/lobby/WaitingLobby.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/games/Game.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/Game.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,6 +44,7 @@
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "php.override.implement.member.chooser.php.doc": "NONE",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -56,7 +57,7 @@
       <option name="presentableId" value="Default" />
       <updated>1669829973521</updated>
       <workItem from="1669829975087" duration="9675000" />
-      <workItem from="1670169120130" duration="1337000" />
+      <workItem from="1670169120130" duration="2314000" />
     </task>
     <task id="LOCAL-00001" summary="Rush, WaitingLobby, Wallrun, fix jump, cosmetics">
       <created>1669830999750</created>

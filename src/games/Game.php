@@ -51,11 +51,7 @@ abstract class Game implements GameInterface{
 
     public function join(PolarisPlayer $player): void
     {
-        if(isset($this->lobby))
-        {
-            $this->lobby->join($player);
-        }else
-        {
+
             $player->setGamemode(GameMode::SURVIVAL());
             $player->sendMessage("§l§b[§a{$this->getName()}§b] §aVous avez rejoint le {$this->getName()} !");
             $this->players[$player->getUniqueId()->toString()] = $player;
@@ -64,7 +60,6 @@ abstract class Game implements GameInterface{
             $this->sendScoreboard($player);
             $player->actualGame = $this;
             $player->hasAccepted[$this->getName()] = false;
-        }
     }
 
 
