@@ -7,6 +7,11 @@
     <list default="true" id="3b300346-49f2-42b5-b0cf-11f81a8ef803" name="Changes" comment="Rush, WaitingLobby, Wallrun, fix jump, cosmetics">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/games/Game.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/Game.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/games/GameLoader.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/GameLoader.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/games/lobby/WaitingLobby.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/lobby/WaitingLobby.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/games/types/Jump.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/types/Jump.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/games/types/TimedGames.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/types/TimedGames.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/trait/LoaderTrait.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/trait/LoaderTrait.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,6 +30,9 @@
   <component name="PhpWorkspaceProjectConfiguration">
     <include_path>
       <path value="$PROJECT_DIR$/../../Source/PocketMine-MP" />
+      <path value="$PROJECT_DIR$/../../../API/resources" />
+      <path value="$PROJECT_DIR$/../../../API/src" />
+      <path value="$PROJECT_DIR$/../../../API/vendor" />
     </include_path>
   </component>
   <component name="ProjectId" id="2IHEBJDyn2UWzvPWAg2MJOfA0QR" />
@@ -44,7 +52,7 @@
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "php.override.implement.member.chooser.php.doc": "NONE",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "settings.editor.selected.configurable": "Settings.JavaScript",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -86,5 +94,9 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Rush, WaitingLobby, Wallrun, fix jump, cosmetics" />
     <option name="LAST_COMMIT_MESSAGE" value="Rush, WaitingLobby, Wallrun, fix jump, cosmetics" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>

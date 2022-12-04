@@ -11,12 +11,12 @@ use pocketmine\Server;
 use pocketmine\utils\SingletonTrait;
 use pocketmine\utils\TextFormat;
 use Polaris\entity\FloatingText;
+use Polaris\games\lobby\WaitingLobby;
 use Polaris\games\types\RoundedGames;
 use Polaris\player\PolarisPlayer;
 use Polaris\utils\GameUtils;
 
 
-//TODO: Refaire le systeme de game pcq c'est con rounded games !== multiple games
 class GameLoader{
     use SingletonTrait;
 
@@ -28,6 +28,11 @@ class GameLoader{
     public Entity $tickerEntity;
 
     public array $gameCount = [];
+
+	/**
+	 * @var WaitingLobby[]
+	 */
+	private array $lobbyCount = [];
 
     public array $lobby = [];
 
@@ -63,15 +68,18 @@ class GameLoader{
         return null;
     }
 
+	/**
+	 * @return void
+	 */
     public function init(): void
     {
         self::registerGame();
         if(Server::getInstance()->getWorldManager()->getWorldByName("PolarisSpawn") === null) return;
-        $this->tickerEntity = new FloatingText(new Location(-63, 60, -68, Server::getInstance()->getWorldManager()->getWorldByName("PolarisSpawn"), 0, 0));
-        $this->tickerEntity->setText("Bienvenue sur Polaris !");
-        $this->tickerEntity->spawnToAll();
     }
 
+	/**
+	 * @return void
+	 */
     private static function registerGame(): void{
         $fakeDir = __DIR__ . "\\types\\";
         $dir = __DIR__."\\Polaris\\" . "\\types\\";
@@ -93,6 +101,10 @@ class GameLoader{
     }
 
 
+	/**
+	 * @param string $name
+	 * @return Game
+	 */
     public function getDisponibleGame(string $name): Game{
         foreach (self::$game as $game){
             if($game instanceof RoundedGames && str_contains($game->getName(), $name)){
@@ -109,28 +121,49 @@ class GameLoader{
         return $this->getDisponibleGame($name);
     }
 
+	/**
+	 * @param Game $game
+	 * @return void
+	 */
     public function addGame(Game $game): void
     {
         $name = strtolower($game->getName());
         $this->addCount($game);
-        $game instanceof MinorGameInterface ?: $this->LobbyCount[] = $game->getLobby();
+        $game instanceof MinorGameInterface ?: $this->lobbyCount[] = $game->getLobby();
         Server::getInstance()->getLogger()->notice(TextFormat::DARK_AQUA."[GAME] §aAdding game: " . $game->getName()."-". $this->gameCount[$name]);
         self::$game[$name."-".$this->gameCount[$name]] = $game;
     }
 
+	/**
+	 * @param Game $game
+	 * @return int
+	 */
     public function getGameCount(Game $game): int{
         return $this->gameCount[strtolower($game->getName())] ?? 0;
     }
 
+	/**
+	 * @param Game $game
+	 * @return void
+	 */
     public function addCount(Game $game): void{
         $name = strtolower($game->getName());
         isset($this->gameCount[$name]) ? $this->gameCount[$name]++ : $this->gameCount[$name] = 1;
     }
 
+	/**
+	 * @param string $name
+	 * @param int $count
+	 * @return Game|null
+	 */
     public static function getGame(string $name, int $count): Game|null{
         return self::$game[strtolower($name)."-".$count] ?? null;
     }
 
+	/**
+	 * @param Game $game
+	 * @return void
+	 */
     public function removeGame(Game $game): void{
         $name = strtolower($game->getName());
         Server::getInstance()->getLogger()->notice(TextFormat::DARK_AQUA."[GAME] §a Removing game: " . $game->getName()."-". $this->gameCount[$name]);
@@ -139,8 +172,19 @@ class GameLoader{
 
     }
 
+	/**
+	 * @return WaitingLobby[]
+	 */
+	final public function getLobbyList(): array
+	{
+		return $this->lobbyCount;
+	}
+
+	/**
+	 * @return Game[]
+	 */
     public static function getGameList(): array{
-        return self::$game;
+        return self::$game ;
     }
 
 }

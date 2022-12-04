@@ -84,6 +84,10 @@ abstract class TimedGames extends Game
 
     public function leave(PolarisPlayer $player): void
     {
+		if(str_contains($this->getSpawn()->getWorld()->getFolderName(), "PolarisSpawn"))
+		{
+			$player->teleportToSpawn();
+		}
         $this->personalData[$player->getName()]["try"]++;
         $player->teleport($this->getSpawn());
         $player->getPlayerProperties()->setNestedProperties("games.jumpdata", $this->personalData[$player->getName()]);

@@ -74,6 +74,7 @@ class WaitingLobby
             [
                 $this->game->getName(),
                 count($this->getPlayers()) . "/".  $this->game->getMinPlayers(),
+				round($this->delay / 20) . "'s restantes"
             ]
         );
         foreach ($this->players as $player)
@@ -98,12 +99,13 @@ class WaitingLobby
 				$this->game->join($player);
 			}
 		}
+		$this->delay--;
     }
 
     public function join(PolarisPlayer $player): void
     {
+		$this->players[$player->getUniqueId()->toString()] = $player;
         $player->teleport($this->getSpawn());
-		var_dump($this->world->getFolderName());
     }
 
     public function getSpawn(): Position

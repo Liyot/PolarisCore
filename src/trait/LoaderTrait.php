@@ -17,7 +17,9 @@ use pocketmine\item\VanillaItems;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\protocol\types\entity\EntityIds;
+use pocketmine\scheduler\AsyncTask;
 use pocketmine\scheduler\ClosureTask;
+use pocketmine\Server;
 use pocketmine\world\Position;
 use pocketmine\world\World;
 use Polaris\blocks\CustomPlate;
@@ -53,9 +55,9 @@ trait LoaderTrait{
         $this->loadCustomGames();
         $this->loadEntity();
         $this->loadBlocks();
-        $this->launchTask();
         $this->loadCommands();
         $this->loadEvents();
+		$this->launchTask();
     }
 
     //Todo: Try to found a way to manipulate the return value of the function.
@@ -140,14 +142,28 @@ trait LoaderTrait{
             "-57:60:-62" => new CustomPlate(), "-59:60:-62" => new CustomPlate(), "-61:60:-62" => new CustomPlate(),
             "-63:60:-62" => new CustomPlate(), "-65:60:-62" => new EndPlate()];
         new Jump(99999, PHP_INT_MAX, 8, new Position(-51, 61, -62, GameUtils::getSpawnWorld()), $blocks, GameUtils::getSpawnPosition());
+
     }
 
     public function launchTask(): void
     {
-        Polaris::getInstance()->getScheduler()->scheduleRepeatingTask(new ClosureTask(function (){
-            foreach (GameLoader::getGameList() as $game){
-                $game->onTick();
-            }
-        }), 1);
+		Polaris::getInstance()->getScheduler()->scheduleRepeatingTask(new ClosureTask(function ()
+		{
+			foreach (GameLoader::getInstance()->getLobbyList() as $lobby)
+			{
+				$lobby->onTick();
+			}
+			foreach (GameLoader::getGameList() as $game){
+				$game->onTick();
+
+			}
+		}), 1);
+       /** Server::getInstance()->getAsyncPool()->submitTask(new class extends AsyncTask{
+			public function onRun(): void{
+				foreach (GameLoader::getGameList() as $game){
+					$game->onTick();
+				}
+			}
+		});*/
     }
 }

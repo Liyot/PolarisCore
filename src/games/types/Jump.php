@@ -40,13 +40,11 @@ final class Jump extends TimedGames implements MinorGameInterface {
 	public function leave(PolarisPlayer $player): void
 	{
 		parent::leave($player);
-
 	}
 
 	public function join(PolarisPlayer $player): void
     {
         if(!$player->getActualGame() instanceof self) {
-			var_dump($player->getActualGame());
             parent::join($player);
             $player->getInventory()->setItem(2, ItemManager::getInstance()->get(VanillaItems::RED_DYE()->getId(), 1)?->setCustomName("§cLeave"));
 

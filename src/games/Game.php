@@ -82,7 +82,7 @@ abstract class Game implements GameInterface{
 
     public function leave(PolarisPlayer $player): void{
         if(isset($this->players[$player->getUniqueId()->toString()])){
-            unset($this->players[$player->getUniqueId()->toString()]);
+			unset($this->players[$player->getUniqueId()->toString()]);
             $player->inGame = false;
             $player->actualGame = null;
             $player->hasAccepted[$this->getName()] = false;
