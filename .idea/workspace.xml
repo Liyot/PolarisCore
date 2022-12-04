@@ -5,17 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3b300346-49f2-42b5-b0cf-11f81a8ef803" name="Changes" comment="Rush, WaitingLobby, Wallrun, fix jump, cosmetics">
+      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/games/Game.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/Game.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/games/lobby/WaitingLobby.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/lobby/WaitingLobby.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/games/types/Jump.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/types/Jump.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/games/types/RushGame.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/types/RushGame.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/games/types/TimedGames.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/types/TimedGames.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/games/types/WallRun.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/types/WallRun.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/listener/PlayerListener.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/listener/PlayerListener.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/trait/LoaderTrait.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/trait/LoaderTrait.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/GameUtils.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/GameUtils.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/PlayerUtils.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/PlayerUtils.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/games/types/ShootCraft.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/types/ShootCraft.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,9 +25,7 @@
   </component>
   <component name="PhpWorkspaceProjectConfiguration">
     <include_path>
-      <path value="$PROJECT_DIR$/../../../API/resources" />
-      <path value="$PROJECT_DIR$/../../../API/src" />
-      <path value="$PROJECT_DIR$/../../../API/vendor" />
+      <path value="$PROJECT_DIR$/../../Source/PocketMine-MP" />
     </include_path>
   </component>
   <component name="ProjectId" id="2IHEBJDyn2UWzvPWAg2MJOfA0QR" />
@@ -48,7 +38,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "C:/Users/ilike/OneDrive/Bureau/Dev/API/vendor",
+    "last_opened_file_path": "C:/Users/Lilian/Dev/Source/PocketMine-MP",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -67,6 +57,7 @@
       <option name="presentableId" value="Default" />
       <updated>1669829973521</updated>
       <workItem from="1669829975087" duration="9675000" />
+      <workItem from="1670169120130" duration="681000" />
     </task>
     <task id="LOCAL-00001" summary="Rush, WaitingLobby, Wallrun, fix jump, cosmetics">
       <created>1669830999750</created>

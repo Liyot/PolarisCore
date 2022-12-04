@@ -16,9 +16,10 @@ use Polaris\player\PolarisPlayer;
 use Polaris\utils\GameUtils;
 use Polaris\utils\ListenerUtils;
 
-
 final class ShootCraft extends Game implements ZoneGame
 {
+
+    private array $coins = [];
 
     private Zone $zone;
 
@@ -135,4 +136,20 @@ final class ShootCraft extends Game implements ZoneGame
     {
         $this->leave($player, $this);
     }
+
+    final protected function getCoins(PolarisPlayer $player): int
+    {
+        return $this->coins[$player->getUniqueId()->toString()];
+    }
+
+    final protected function removeCoins(PolarisPlayer $player, int $coins): void
+    {
+        (($coins = $this->coins[$player->getUniqueId()->toString()]) - $coins) < 0 ? $this->coins[$player->getUniqueId()->toString()] = 0 : $this->coins[$player->getUniqueId()->toString()] -= $coins;
+    }
+
+    final protected function addCoins (PolarisPlayer $player, int $coins): void
+    {
+        $this->coins[$player->getUniqueId()->toString()] += $coins;
+    }
+
 }
