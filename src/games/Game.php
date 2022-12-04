@@ -25,15 +25,24 @@ abstract class Game implements GameInterface{
 
     public GameProperties $properties;
 
-    public function __construct(protected int $id, protected int $maxPlayer, protected int $time, protected string  $name = "")
+    public function __construct(protected int $id, protected int $maxPlayer, protected int $minPlayers, protected int $time, protected string  $name = "")
     {
+
         if(!$this instanceof MinorGameInterface)
         {
-            $this->lobby = new WaitingLobby();
+            $this->lobby = new WaitingLobby($this);
         }
         $this->initProperties();
         $this->initListeners();
     }
+
+	/**
+	 * @return int
+	 */
+	public function getMinPlayers(): int
+	{
+		return $this->minPlayers;
+	}
 
     public function getName(): string
     {
@@ -83,6 +92,7 @@ abstract class Game implements GameInterface{
             $player->actualGame = null;
             $player->hasAccepted[$this->getName()] = false;
             $player->setScoreboard(PlayerUtils::getBaseScoreboard($player));
+			$player->getInventory()->clearAll();
             $player->sendMessage("§l§b[§a{$this->getName()}§b] §aVous avez quitté le {$this->getName()} !");
         }
     }

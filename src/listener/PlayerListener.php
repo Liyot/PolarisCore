@@ -108,21 +108,22 @@ class PlayerListener implements Listener
                 $player->teleportToSpawn();
             }
             $block = $player->getWorld()->getBlock($player->getPosition(), false, false);
-            $game = $player->getActualGame();
+            $Actualgame = $player->getActualGame();
             if ($block instanceof CustomPlate) {
-                if (!$game instanceof Jump) {
+                if (!$Actualgame instanceof TimedGames) {
                     foreach (GameLoader::getGameList() as $game) {
-                        if ($game instanceof TimedGames && $game->pos->distance($player->getPosition()) <= 1.5 & $game->pos->world === $player->getWorld()) {
+                        if ($game instanceof TimedGames && $game->pos->distance($player->getPosition()) <= 1.5 && $game->pos->world === $player->getWorld()) {
                             $game->join($player);
+							return;
                         }
                     }
                     return;
                 }
-                $game->nextCheckpoint($player);
+                $Actualgame->nextCheckpoint($player);
             } elseif ($block instanceof EndPlate) {
-                if($game instanceof TimedGames)
+                if($Actualgame instanceof TimedGames)
                 {
-                    $game->finish($player);
+                    $Actualgame->finish($player);
                 }
             }
         }

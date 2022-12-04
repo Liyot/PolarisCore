@@ -16,7 +16,7 @@ use Polaris\utils\ListenerUtils;
 final class WallRun extends TimedGames implements MinorGameInterface
 {
 
-    public function __construct(Position $pos, public int $maxcheckpoints, array $nonPlacedblocks)
+    public function __construct(Position $pos, public int $maxcheckpoints, array $nonPlacedblocks, protected Position $spawn)
     {
         parent::__construct(GameUtils::ID_WALLRUN,1, PHP_INT_MAX,"WallRun" ,$pos, $nonPlacedblocks);
         $this->pos = $pos;
@@ -32,6 +32,11 @@ final class WallRun extends TimedGames implements MinorGameInterface
             $this->nextCheckpoint($player);
         }
     }
+
+	protected function getSpawn(): Position
+	{
+		return $this->spawn;
+	}
 
     public function initListeners(): void
     {

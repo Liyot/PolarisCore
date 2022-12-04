@@ -92,7 +92,7 @@ final class RushGame extends Game
 
         $this->addTeam(new Team("Red", $maxPlayer), new Team("Blue", $maxPlayer));
 
-        parent::__construct(GameUtils::ID_RUSHGAME, $maxPlayer, 0, "RushGame");
+        parent::__construct(GameUtils::ID_RUSHGAME, $maxPlayer,3, 0, "RushGame");
         GameLoader::getInstance()->addGame($this);
 
         $this->properties->setProperties("starting", true);

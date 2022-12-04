@@ -27,17 +27,18 @@ class WaitingLobby
     private Jump $jump;
     private WallRun $wallRun;
 
-    private int $delay = 20 * 60;
+    private int $delay = 20 * 60 * 5;
 
     private array $players = [];
 
-    public function __construct()
+    public function __construct(private Game $game)
     {
         $this->world = Server::getInstance()->getWorldManager()->getWorldByName($this->copyWorld("Lobi", "Lobi".count(GameLoader::getInstance()->lobby)));
-        $block = ["16:85:-216" => new CustomPlate(), "33:82:-215" => new EndPlate()];
-        $this->wallRun = new WallRun(new Position(15, 85, -216, $this->world), 2, $block);
+		Server::getInstance()->getWorldManager()->loadWorld($this->world->getFolderName());
+        $blocks = ["16:85:-216" => new CustomPlate(), "33:82:-215" => new EndPlate()];
+        $this->wallRun = new WallRun(new Position(15, 85, -216, $this->world), 2, $blocks, $this->getSpawn());
         $blocks = ["-19:86:-262" => new CustomPlate(), "-19:86:-266" => new CustomPlate(), "-19:86:-270" => new CustomPlate(), "-19:86:-273" => new CustomPlate(), "-19:86:-275" => new EndPlate()];
-        $this->jump = new Jump(9999, PHP_INT_MAX, 9, new Position(-19, 86, -261, $this->world), $blocks);
+        $this->jump = new Jump(9999, PHP_INT_MAX, 5, new Position(-19, 86, -261, $this->world), $blocks, $this->getSpawn());
     }
 
     public function getWallRun(): WallRun
@@ -50,6 +51,14 @@ class WaitingLobby
         return $this->jump;
     }
 
+	/**
+	 * @return PolarisPlayer[]
+	 */
+	public function getPlayers(): array
+	{
+		return $this->players;
+	}
+
     public function __destruct()
     {
         Server::getInstance()->getLogger()->notice(TextFormat::AQUA. "Disabling Lobby number " . count(GameLoader::getInstance()->lobby));
@@ -58,11 +67,32 @@ class WaitingLobby
 
     public function onTick(): void
     {
+		//$scoreboard = new
+		if($this->getPlayers() >= $this->game->getMinPlayers())
+		{
+			$this->delay = 20 * 10;
+		}
+
+		if($this->delay < 20 * 5)
+		{
+			foreach ($this->getPlayers() as $player)
+			{
+				$player->sendSubTitle(($this->delay < 2 ? "§4" : "§2"). $this->delay);
+			}
+		}
+		if($this->delay === 0)
+		{
+			foreach ($this->getPlayers() as $player)
+			{
+				$this->game->join($player);
+			}
+		}
     }
 
     public function join(PolarisPlayer $player): void
     {
         $player->teleport($this->getSpawn());
+		var_dump($this->world->getFolderName());
     }
 
     public function getSpawn(): Position

@@ -4,31 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3b300346-49f2-42b5-b0cf-11f81a8ef803" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/games/MinorGameInterface.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/games/types/TimedGames.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/games/types/WallRun.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dbnavigator.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
+    <list default="true" id="3b300346-49f2-42b5-b0cf-11f81a8ef803" name="Changes" comment="Rush, WaitingLobby, Wallrun, fix jump, cosmetics">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Polaris.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Polaris.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cosmetics/Cosmetic.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/cosmetics/Cosmetic.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cosmetics/CosmeticsManager.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/cosmetics/CosmeticsManager.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cosmetics/CosmeticsTrait.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/cosmetics/CosmeticsTrait.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/games/Game.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/Game.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/games/GameListener.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/GameListener.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/games/GameLoader.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/GameLoader.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/games/lobby/WaitingLobby.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/lobby/WaitingLobby.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/games/queue/Queue.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/queue/Queue.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/games/types/GetDown.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/types/GetDown.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/games/types/Jump.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/types/Jump.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/games/types/RoundedGames.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/types/RoundedGames.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/games/types/RushGame.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/types/RushGame.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/games/types/ShootCraft.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/types/ShootCraft.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/games/types/TimedGames.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/types/TimedGames.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/games/types/WallRun.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/types/WallRun.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/listener/PlayerListener.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/listener/PlayerListener.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/trait/LoaderTrait.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/trait/LoaderTrait.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/utils/GameUtils.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/GameUtils.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/ListenerUtils.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/ListenerUtils.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/PlayerUtils.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/PlayerUtils.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,6 +53,8 @@
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "php.override.implement.member.chooser.php.doc": "NONE",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -77,8 +66,16 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1669829973521</updated>
-      <workItem from="1669829975087" duration="862000" />
+      <workItem from="1669829975087" duration="9675000" />
     </task>
+    <task id="LOCAL-00001" summary="Rush, WaitingLobby, Wallrun, fix jump, cosmetics">
+      <created>1669830999750</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1669830999750</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -94,5 +91,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Rush, WaitingLobby, Wallrun, fix jump, cosmetics" />
+    <option name="LAST_COMMIT_MESSAGE" value="Rush, WaitingLobby, Wallrun, fix jump, cosmetics" />
   </component>
 </project>

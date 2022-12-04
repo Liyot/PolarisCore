@@ -20,7 +20,7 @@ use Polaris\utils\GameUtils;
 
 final class Jump extends TimedGames implements MinorGameInterface {
 
-    public function __construct(public int $maxPlayer, public int $time, public int $maxcheckpoints, public Position $pos, array $nonPlacedblocks)
+    public function __construct(public int $maxPlayer, public int $time, public int $maxcheckpoints, public Position $pos, array $nonPlacedblocks, protected Position $spawn)
     {
         parent::__construct(GameUtils::ID_JUMP, $maxPlayer, $time, "Jump", $pos, $nonPlacedblocks);
     }
@@ -37,11 +37,18 @@ final class Jump extends TimedGames implements MinorGameInterface {
         GameLoader::getInstance()->removeGame($this);
     }
 
-    public function join(PolarisPlayer $player): void
+	public function leave(PolarisPlayer $player): void
+	{
+		parent::leave($player);
+
+	}
+
+	public function join(PolarisPlayer $player): void
     {
         if(!$player->getActualGame() instanceof self) {
+			var_dump($player->getActualGame());
             parent::join($player);
-            $player->getInventory()->setItem(2, ItemManager::getInstance()->get(VanillaItems::RED_DYE()->getId())?->setCustomName("§cLeave"));
+            $player->getInventory()->setItem(2, ItemManager::getInstance()->get(VanillaItems::RED_DYE()->getId(), 1)?->setCustomName("§cLeave"));
 
             $player->getInventory()->setItem(6, VanillaItems::GREEN_DYE()->setCustomName("§aGo to checkpoint"));
         }else{
@@ -53,4 +60,9 @@ final class Jump extends TimedGames implements MinorGameInterface {
     {
         return $this->pos;
     }
+
+	protected function getSpawn(): Position
+	{
+		return $this->spawn;
+	}
 }

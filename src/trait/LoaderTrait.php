@@ -139,7 +139,7 @@ trait LoaderTrait{
         $blocks = ["-51:60:-62" => new CustomPlate(), "-53:60:-62" => new CustomPlate(),"-55:60:-62" => new CustomPlate() ,
             "-57:60:-62" => new CustomPlate(), "-59:60:-62" => new CustomPlate(), "-61:60:-62" => new CustomPlate(),
             "-63:60:-62" => new CustomPlate(), "-65:60:-62" => new EndPlate()];
-        new Jump(99999, PHP_INT_MAX, 8, new Position(-51, 61, -62, GameUtils::getSpawnWorld()), $blocks);
+        new Jump(99999, PHP_INT_MAX, 8, new Position(-51, 61, -62, GameUtils::getSpawnWorld()), $blocks, GameUtils::getSpawnPosition());
     }
 
     public function launchTask(): void

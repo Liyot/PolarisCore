@@ -56,7 +56,7 @@ class PlayerUtils{
     public static function getBaseScoreboard(PolarisPlayer $player): Scoreboard{
         $ip = Server::getInstance()->getIp();
         $name = $player->getName();
-        return new Scoreboard("§l§aPolaris§r§7", [$ip, $name, "lobby"]);
+        return new Scoreboard("§l§aPolaris§r§7", [$ip, $name, $player->getWorld()->getFolderName()]);
     }
 
     public static function matchPremium(PolarisPlayer $player, object $toMath): bool{

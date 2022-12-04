@@ -3,6 +3,7 @@
 namespace Polaris\utils;
 
 use pocketmine\Server;
+use pocketmine\world\Position;
 use pocketmine\world\World;
 
 class GameUtils{
@@ -27,6 +28,11 @@ class GameUtils{
     public static function getSpawnWorld(): World{
         return Server::getInstance()->getWorldManager()->getWorldByName('PolarisSpawn');
     }
+
+	public static function getSpawnPosition(): Position
+	{
+		return new Position(-57, 60, -68, Server::getInstance()->getWorldManager()->getWorldByName("PolarisSpawn"));
+	}
 
     public static function PNGtoBYTES(string $path)
     {
