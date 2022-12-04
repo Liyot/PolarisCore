@@ -6,7 +6,6 @@ use pocketmine\item\ItemFactory;
 use pocketmine\item\VanillaItems;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\SingletonTrait;
-use Polaris\cosmetics\CosmeticsManager;
 use Polaris\games\GameLoader;
 use Polaris\groups\Group;
 use Polaris\item\EnderPearl;

@@ -16,6 +16,7 @@ use Polaris\games\types\Jump;
 use Polaris\games\types\WallRun;
 use Polaris\player\PolarisPlayer;
 use Polaris\trait\VectorUtilsTrait;
+use Polaris\utils\Scoreboard;
 
 class WaitingLobby
 {
@@ -28,7 +29,9 @@ class WaitingLobby
     private WallRun $wallRun;
 
     private int $delay = 20 * 60 * 5;
-
+    /**
+     * @var PolarisPlayer[]
+     */
     private array $players = [];
 
     public function __construct(private Game $game)
@@ -67,19 +70,27 @@ class WaitingLobby
 
     public function onTick(): void
     {
-		//$scoreboard = new
-		if($this->getPlayers() >= $this->game->getMinPlayers())
+		$scoreboard = new Scoreboard("§l§aPolaris§r§7",
+            [
+                $this->game->getName(),
+                count($this->getPlayers()) . "/".  $this->game->getMinPlayers(),
+            ]
+        );
+        foreach ($this->players as $player)
+        {
+            if($this->delay < 20 * 5)
+            {
+            $player->sendSubTitle(($this->delay < 2 ? "§4" : "§2"). $this->delay);
+            }
+
+            $player->setScoreboard($scoreboard);
+        }
+
+		if(count($this->getPlayers()) >= $this->game->getMinPlayers())
 		{
 			$this->delay = 20 * 10;
 		}
 
-		if($this->delay < 20 * 5)
-		{
-			foreach ($this->getPlayers() as $player)
-			{
-				$player->sendSubTitle(($this->delay < 2 ? "§4" : "§2"). $this->delay);
-			}
-		}
 		if($this->delay === 0)
 		{
 			foreach ($this->getPlayers() as $player)
