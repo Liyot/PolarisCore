@@ -21,6 +21,7 @@ use pocketmine\player\GameMode;
 use pocketmine\scheduler\CancelTaskException;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\Server;
+use pocketmine\utils\Filesystem;
 use pocketmine\world\World;
 use Polaris\entity\VillagerEntity;
 use Polaris\games\Game;
@@ -93,11 +94,12 @@ final class RushGame extends Game
         $this->addTeam(new Team("Red", $maxPlayer), new Team("Blue", $maxPlayer));
 
         parent::__construct(GameUtils::ID_RUSHGAME, $maxPlayer,3, 0, "RushGame");
-        GameLoader::getInstance()->addGame($this);
+
+		$this->world = Server::getInstance()->getWorldManager()->getWorldByName($this->copyWorld("RushPattern\\RushFastPattern4vs4", "CurrentRush\\Rush$type.$count")); //TODO generate suffix
+		GameLoader::getInstance()->addGame($this);
 
         $this->properties->setProperties("starting", true);
         $this->queue = new Queue($this->getName(), $maxPlayer, $this);
-        $this->world = Server::getInstance()->getWorldManager()->getWorldByName($this->copyWorld("RushPattern\\RushFastPattern4vs4", "CurrentRush\\Rush$type.$count")); //TODO generate suffix
 
         $this->villagers = [
             /**WARNING: va falloir modifier le yaw bien comme il faut, ça dépend de la map là
@@ -203,188 +205,6 @@ final class RushGame extends Game
                     "Blue" => 0,
                 ],
             ]);
-
-        $this->addCallback("GeneratorsTnt", function (string $team) {
-            $this->processCallBack("ItemGenerator", VanillaBlocks::TNT()->asItem(), $this->properties->getPropertiesList()["GameInfo"]["GeneratorsTnt"][$team], 20 * 60, true);
-        });
-
-        $this->addCallback("ItemGenerator", function (Item $item, array $vectors, int $tick, bool $spawnWhenCalled = false) {
-            if ($spawnWhenCalled) {
-                foreach ($vectors as $vector3) {
-                    if (!$vector3 instanceof Vector3) continue;
-                    $this->getWorld()->dropItem($vector3, $item, new Vector3(0, 0.2, 0));
-                }
-            }
-            Polaris::getInstance()->getScheduler()->scheduleRepeatingTask(new ClosureTask(function () use ($item, $vectors) {
-                foreach ($vectors as $vector3) {
-                    if (!$vector3 instanceof Vector3) continue;
-                    $this->getWorld()->dropItem($vector3, $item, new Vector3(0, 0.2, 0));
-                }
-            }), $tick);
-        });
-
-        $this->addCallback("LoadPlayer", function (PolarisPlayer $player) {
-            $player->setHealth(20);
-            $this->sendScoreboard($player);
-            $player->setAbsorption($this->properties->getProperties("GameInfo")["TeamAbsorption"][$player->getTeam()?->getName()] ? null : 0);
-            $pos = $this->properties->getProperties("GameInfo")["TeamPosition"][$player->getTeam()?->getName()];
-            $this->getWorld()->loadChunk($pos->x, $pos->z);
-            $player->teleport(Location::fromObject($pos, $this->getWorld()));
-            $sword = VanillaItems::IRON_SWORD();
-
-
-            /** @var Armor[] $armors */
-            $armors = [ //TODO: check enchantment
-                VanillaItems::LEATHER_CAP(),
-                VanillaItems::LEATHER_TUNIC(),
-                VanillaItems::LEATHER_PANTS(),
-                VanillaItems::LEATHER_BOOTS()
-            ];
-
-            //TODO: atout (genre 16 blocks dès le départ)
-            $flint = VanillaItems::FLINT_AND_STEEL();
-            $player->getInventory()->setItem(0, $sword);
-            $player->getInventory()->setItem(1, $flint);
-            switch ($player->getTeam()->getName()) {
-                case "Red":
-                    $player->getArmorInventory()->setHelmet($armors[0]->setCustomColor(new Color(0xb0, 0x2e, 0x26)));
-                    $player->getArmorInventory()->setChestplate($armors[1]->setCustomColor(new Color(0xb0, 0x2e, 0x26)));
-                    $player->getArmorInventory()->setLeggings($armors[2]->setCustomColor(new Color(0xb0, 0x2e, 0x26)));
-                    $player->getArmorInventory()->setBoots($armors[3]->setCustomColor(new Color(0xb0, 0x2e, 0x26)));
-                    break;
-                case "Blue":
-                    $player->getArmorInventory()->setHelmet($armors[0]->setCustomColor(new Color(0x3c, 0x44, 0xaa)));
-                    $player->getArmorInventory()->setChestplate($armors[1]->setCustomColor(new Color(0x3c, 0x44, 0xaa)));
-                    $player->getArmorInventory()->setLeggings($armors[2]->setCustomColor(new Color(0x3c, 0x44, 0xaa)));
-                    $player->getArmorInventory()->setBoots($armors[3]->setCustomColor(new Color(0x3c, 0x44, 0xaa)));
-                    break;
-            }
-
-            $delay = 5;
-            Polaris::getInstance()->getScheduler()->scheduleDelayedTask(new ClosureTask(function () use ($player, $sword, $delay): void {
-                if ($delay <= 0) {
-                    if ($player?->getInventory()->contains($sword)) {
-                        $player->getInventory()->removeItem($sword);
-                        $player->getInventory()->addItem($sword->addEnchantment(new EnchantmentInstance(VanillaEnchantments::SHARPNESS(), 2)));
-                    }
-                    throw new CancelTaskException();
-                }
-                $delay--;
-            }), 5 * 20);
-        });
-
-        $this->addCallback("TeamBedExplode", function (PolarisPlayer $player, Bed $block) {
-            switch ($player->getTeam()->getName()) {
-                case "Red":
-                    if (in_array($block, $this->properties->getProperties("GameInfo")["BedPosition"]["Blue"], $block) or in_array($block, $this->properties->getProperties("GameInfo")["BedPosition"]["Blue"], $block->getOtherHalf())) {
-                        $this->properties->setNestedProperties("GameInfo.BedAlive.Blue", false);
-                        //TODO: scoreboard
-                        foreach ($this->getWorld()->getPlayers() as $p) {
-                            if (!$p instanceof PolarisPlayer) return;
-                            $p->sendMessage($player->getName() . " a explosé le lit de l'équipe Bleu");
-                            $this->sendScoreboard($p);
-                        }
-                        foreach ($this->players as $p) {
-                            if ($p->getTeam()->getName() === "Blue") {
-                                $p->sendMessage("Votre lit d'équipe vient d'être détruit, vous ne réapparaîtrez plus");
-                            }
-                        }
-                    }
-                    break;
-                case "Blue":
-                    if (in_array($block, $this->properties->getProperties("GameInfo")["BedPosition"]["Red"], $block) or in_array($block, $this->properties->getProperties("GameInfo")["BedPosition"]["Red"], $block->getOtherHalf())) {
-                        $this->properties->setNestedProperties("GameInfo.BedAlive.Red", false);
-                        foreach ($this->getWorld()->getPlayers() as $p) {
-                            if (!$p instanceof PolarisPlayer) return;
-                            $p->sendMessage($player->getName() . " a explosé le lit de l'équipe Bleu");
-                            $this->sendScoreboard($p);
-                        }
-                        foreach ($this->players as $p) {
-                            if ($p->getTeam()->getName() === "Red") {
-                                $p->sendMessage("Votre lit d'équipe vient d'être détruit, vous ne réapparaîtrez plus");
-                            }
-                        }
-                    }
-                    break;
-            }
-        });
-        $this->addCallback("kill", function (PolarisPlayer $victim, ?PolarisPlayer $killer = null, ?int $cause = null) {
-            //TODO: add $killer kill $point + $victim death
-            //Todo: check if block position is dead
-            if ($killer != null) {
-                $this->properties->setNestedProperties("GameInfo.Players." . $killer->getUniqueId()->toString() . ".kill",
-                    (int)$this->properties->getProperties("GameInfo")["Players"][$killer->getUniqueId()->toString()]["kill"] + 1);
-                $this->sendScoreboard($killer);
-                $victim->sendMessage("$killer vous a tuez");
-                $killer->sendMessage("Vous avez tuez $victim");
-            } else {
-                switch ($cause) {
-                    case EntityDamageEvent::CAUSE_SUFFOCATION:
-                        foreach ($this->getWorld()->getPlayers() as $p) {
-                            $p->sendMessage("La maman à $victim ne lui a pas appris à respirer au bon moment");
-                        }
-                        break;
-                    case EntityDamageEvent::CAUSE_FALL:
-                        foreach ($this->getWorld()->getPlayers() as $p) {
-                            $p->sendMessage("$victim s'est pris pour Spider-Man");
-                        }
-                        break;
-                    case EntityDamageEvent::CAUSE_VOID:
-                        foreach ($this->getWorld()->getPlayers() as $p) {
-                            $p->sendMessage("$victim n'a pas regardé où il marchait Soit plus prudent la prochaine fois :)");
-                        }
-                        break;
-                    case EntityDamageEvent::CAUSE_ENTITY_EXPLOSION:
-                        foreach ($this->getWorld()->getPlayers() as $p) {
-                            $p->sendMessage("$victim s'est pris un 14 juillet dans la tête");
-                        }
-                        break;
-                    case null;
-                        foreach ($this->getWorld()->getPlayers() as $p) {
-                            $p->sendMessage("$killer a tué $victim");
-                        }
-                        break;
-                }
-            }
-            $this->properties->setNestedProperties("GameInfo.Players." . $victim->getUniqueId()->toString() . ".kill",
-                (int)$this->properties->getProperties("GameInfo")["Players"][$victim->getUniqueId()->toString()]["kill"] + 1);
-            $this->sendScoreboard($victim);
-            if ($this->properties->getProperties("GameInfo")["BedAlive"][$victim->getTeam()->getName()]) {
-                $this->processCallback("LoadPlayer", $victim);
-                Polaris::getInstance()->getScheduler()->scheduleRepeatingTask(new CooldownTask(5,
-                    function (PolarisPlayer $victim) {
-                        $victim->sendMessage("§l§b[§a{$this->getName()}§b] §akill dans §e{time} §asecondes");
-                        $this->processCallback("LoadPlayer", $victim);
-                    }, $victim
-                ), 20);
-            } else {
-                $this->deadPlayers[$victim->getUniqueId()->toString()] = $victim;
-                $victim->sendTitle("§cMort");
-                $victim->sendSubTitle("§cVous ne pouvez plus réapparaître");
-                $victim->setGamemode(GameMode::SPECTATOR());
-                $victim->isAbleToBeAViewerSpectator = true;
-            }
-            $this->processCallBack("initGame");
-        });
-        $this->addCallback("initGame", function () {
-            foreach ($this->getTeams() as $team) {
-                if (count($team->getPlayers()) === 0) {
-                    foreach ($team->getPlayers() as $player) {
-                        $player->sendTitle("§aPerdu !", "Votre équipe a perdu.", -1, 20, 20 * 2);
-                    }
-                    foreach ($this->players as $player) {
-                        if ($player->getTeam()?->getName() !== $team->getName()) {
-                            $player->sendTitle("§6Victoire !", "Votre équipe a gagné !", -1, 20, 20 * 2);
-                        }
-                    }
-                    $this->onStop();
-                    return;
-                }
-            }
-        });
-        $this->addCallback("end", function (PolarisPlayer $player) {
-            //TODO: give xp, + 1 win data, tp lobby, reset inventory, reset team, reset gamemode, reset inGame
-        });
     }
 
     public function preJoin(PolarisPlayer $player): void
@@ -460,7 +280,7 @@ final class RushGame extends Game
             str_replace("{time}", $this->secondToTimer($this->time * 20), $this->getScoreboardLine()[0]),
             str_replace(["{blue}", "{red}"], [count($this->getTeam("Blue")?->getPlayers()), count($this->getTeam("Red")?->getPlayers())], $this->getScoreboardLine()[1]),
             str_replace("{alive}", $this->properties->getProperties("GameInfo")["BedAlive"][$player->getTeam()->getName()], $this->getScoreboardLine()[2]),
-            //str_replace(["{kill}", "{death}"], [$this->timeToTwoChars((int)$this->properties->getProperties("GameInfo")["Players"][$player->getName()]["kill"]), $this->timeToTwoChars((int)$this->properties->getProperties("GameInfo")["Players"][$player->getName()]["death"])], $this->getScoreboardLine()[3]),
+            str_replace(["{kill}", "{death}"], [$this->timeToTwoChars((int)$this->properties->getProperties("GameInfo")["Players"][$player->getName()]["kill"]), $this->timeToTwoChars((int)$this->properties->getProperties("GameInfo")["Players"][$player->getName()]["death"])], $this->getScoreboardLine()[3]),
         ]));
     }
 
@@ -493,132 +313,7 @@ final class RushGame extends Game
         parent::onTick();
     }
 
-    protected function initListeners(): void
-    {
-        $this->addCallback(
-            ListenerUtils::ENTITY_DAMAGE, function (EntityDamageEvent $event) {
-                $victim = $event->getEntity();
-                if (!$victim instanceof PolarisPlayer) return;
-                if ($event instanceof EntityDamageByEntityEvent) {
-                    $damager = $event->getDamager();
-                    if (!$damager instanceof PolarisPlayer) return;
-                    if ($victim->getTeam()->getName() === $damager->getTeam()->getName()) {
-                        $event->cancel();
-                    } else {
-                        if ($event->getFinalDamage() >= $victim->getHealth()) {
-                            $event->cancel();
-                            $this->processCallback("kill", $victim, $damager, null);
-                        }
-                    }
-                    return;
-                }
-                if ($event->getFinalDamage() >= $victim->getHealth()) {
-                    $event->cancel();
-                    $this->processCallBack("kill", $victim, null, $event->getCause());
-                }
-            });
-        $this->addCallback(ListenerUtils::ENTITY_EXPLODE,  function (EntityExplodeEvent $event)
-        {
-            //pas au point, j'était fatigué
-            $player = $event->getEntity()?->getOwningEntity();
-            if (!$player instanceof PolarisPlayer) return;
-            $properties = $this->properties->getProperties("GameInfo")["BedPosition"];
-            foreach ($event->getBlockList() as $block) {
-                if ($block instanceof Bed) {
-                    $event->setBlockList(array_diff([$block->getOtherHalf()], $event->getBlockList()));
-                    switch (array_keys($properties)) {
-                        case "Base2":
-                            $player->setAbsorption($player->getAbsorption() + (float)$properties["Base2"][$player->getTeam()?->getName()][0]);
-                            foreach ($this->getWorld()->getPlayers() as $p) {
-                                $p->sendMessage($player->getName() . "a explosé un lit et octroie un bonus de " . (float)$properties["Base7"][$player->getTeam()->getName()][0] . " ❤ à son équipe");
-                            }
-                            if ($properties["Base2"][$player->getTeam()?->getName()][1] !== null) {
-                                $this->processCallBack("GeneratorsTnt", $player->getTeam()?->getName());
-                            }
-                            break;
-                        case "Base3":
-                            $player->setAbsorption($player->getAbsorption() + (float)$properties["Base3"][$player->getTeam()?->getName()][0]);
-                            foreach ($this->getWorld()->getPlayers() as $p) {
-                                $p->sendMessage($player->getName() . "a explosé un lit et octroie un bonus de " . (float)$properties["Base7"][$player->getTeam()->getName()][0] . " ❤ à son équipe");
-                            }
-                            if ($properties["Base3"][$player->getTeam()?->getName()][1] !== null) {
-                                $this->processCallBack("GeneratorsTnt", $player->getTeam()?->getName());
-                            }
-                            break;
-                        case "Base4":
-                            $player->setAbsorption($player->getAbsorption() + (float)$properties["Base4"][$player->getTeam()->getName()][0]);
-                            foreach ($this->getWorld()->getPlayers() as $p) {
-                                $p->sendMessage($player->getName() . "a explosé un lit et octroie un bonus de " . (float)$properties["Base7"][$player->getTeam()->getName()][0] . " ❤ à son équipe");
-                            }
-                            if ($properties["Base4"][$player->getTeam()?->getName()][1] !== null) {
-                                $this->processCallBack("GeneratorsTnt", $player->getTeam()?->getName());
-                            }
-                            break;
-                        case "Base5":
-                            $player->setAbsorption($player->getAbsorption() + (float)$properties["Base5"][$player->getTeam()->getName()][0]);
-                            foreach ($this->getWorld()->getPlayers() as $p) {
-                                $p->sendMessage($player->getName() . "a explosé un lit et octroie un bonus de " . (float)$properties["Base7"][$player->getTeam()->getName()][0] . " ❤ à son équipe");
-                            }
-                            if ($properties["Base5"][$player->getTeam()?->getName()][1] !== null) {
-                                $this->processCallBack("GeneratorsTnt", $player->getTeam()?->getName());
-                            }
-                            break;
-                       case "Base6":
-                           $player->setAbsorption($player->getAbsorption() + (float)$properties["Base6"][$player->getTeam()->getName()][0]);
-                           foreach ($this->getWorld()->getPlayers() as $p) {
-                               $p->sendMessage($player->getName() . "a explosé un lit et octroie un bonus de " . (float)$properties["Base7"][$player->getTeam()->getName()][0] . " ❤ à son équipe");
-                           }
-                           if ($properties["Base6"][$player->getTeam()?->getName()][1] !== null) {
-                               $this->processCallBack("GeneratorsTnt", $player->getTeam()?->getName());
-                           }
-                           break;
-                       case "Base7":
-                           $player->setAbsorption($player->getAbsorption() + (float)$properties["Base7"][$player->getTeam()->getName()][0]);
-                           foreach ($this->getWorld()->getPlayers() as $p) {
-                               $p->sendMessage($player->getName() . "a explosé un lit et octroie un bonus de " . (float)$properties["Base7"][$player->getTeam()->getName()][0] . " ❤ à son équipe");
-                           }
-                           if ($properties["Base7"][$player->getTeam()->getName()][1] !== null) {
-                               $this->processCallBack("GeneratorsTnt", $player->getTeam()->getName());
-                           }
-                           break;
-                       default:
-                           foreach ($event->getBlockList() as $blockList) {
-                               if (!in_array($block, $this->forbiddenBlock)) continue;
-                               $event->setBlockList(array_diff([$blockList], $this->forbiddenBlock));
-                           }
-                           foreach ($event->getBlockList() as $blockList) {
-                               if ($blockList instanceof Bed) {
-                                   if (in_array($block->getPosition(), $properties[$player->getTeam()->getName()])) {
-                                       $event->setBlockList(array_diff([$blockList], $this->forbiddenBlock));
-                                       $player->sendMessage("§cVous ne pouvez pas casser le lit de votre équipe");
-                                   } else {
-                                       $this->processCallBack("TeamBedExplode", $player, $block);
-                                   }
-                               }
-                           }
-                           break;
-                        }
-                    }
-                }
 
-            });
-        $this->addCallback(ListenerUtils::BLOCK_BREAK, function (BlockBreakEvent $event) {
-            $block = $event->getBlock();
-            if (in_array($block, $this->forbiddenBlock)) {
-                $event->cancel();
-            }
-        });
-    }
-
-    public function onStop(): void
-    {
-        $this->properties->setProperties("running", false);
-        $this->properties->setProperties("ending", true);
-        foreach ($this->players as $player) {
-            $this->processCallback("end", $player);
-        }
-        GameLoader::getInstance()->removeGame($this);
-    }
 
     public function getScoreboardLine(): array
     {
@@ -649,4 +344,326 @@ final class RushGame extends Game
     {
         return $this->villagers;
     }
+	protected function initListeners(): void
+	{
+		$this->addCallback(
+			ListenerUtils::ENTITY_DAMAGE, function (EntityDamageEvent $event) {
+				$victim = $event->getEntity();
+				if (!$victim instanceof PolarisPlayer) return;
+				if ($event instanceof EntityDamageByEntityEvent) {
+					$damager = $event->getDamager();
+					if (!$damager instanceof PolarisPlayer) return;
+					if ($victim->getTeam()->getName() === $damager->getTeam()->getName()) {
+						$event->cancel();
+					} else {
+						if ($event->getFinalDamage() >= $victim->getHealth()) {
+							$event->cancel();
+							$this->processCallback("kill", $victim, $damager, null);
+						}
+					}
+					return;
+				}
+				if ($event->getFinalDamage() >= $victim->getHealth()) {
+					$event->cancel();
+					$this->processCallBack("kill", $victim, null, $event->getCause());
+				}
+			});
+		$this->addCallback(ListenerUtils::ENTITY_EXPLODE,  function (EntityExplodeEvent $event)
+		{
+		//pas au point, j'était fatigué
+
+			$player = $event->getEntity()?->getOwningEntity();
+			if (!$player instanceof PolarisPlayer) return;
+			$properties = $this->properties->getProperties("GameInfo")["BedPosition"];
+			foreach ($event->getBlockList() as $block) {
+				if ($block instanceof Bed) {
+					$event->setBlockList(array_diff([$block->getOtherHalf()], $event->getBlockList()));
+					switch (array_keys($properties)) {
+						case "Base2":
+							$player->setAbsorption($player->getAbsorption() + (float)$properties["Base2"][$player->getTeam()?->getName()][0]);
+							foreach ($this->getWorld()->getPlayers() as $p) {
+								$p->sendMessage($player->getName() . "a explosé un lit et octroie un bonus de " . (float)$properties["Base7"][$player->getTeam()->getName()][0] . " ❤ à son équipe");
+							}
+							if ($properties["Base2"][$player->getTeam()?->getName()][1] !== null) {
+								$this->processCallBack("GeneratorsTnt", $player->getTeam()?->getName());
+							}
+							break;
+						case "Base3":
+							$player->setAbsorption($player->getAbsorption() + (float)$properties["Base3"][$player->getTeam()?->getName()][0]);
+							foreach ($this->getWorld()->getPlayers() as $p) {
+								$p->sendMessage($player->getName() . "a explosé un lit et octroie un bonus de " . (float)$properties["Base7"][$player->getTeam()->getName()][0] . " ❤ à son équipe");
+							}
+							if ($properties["Base3"][$player->getTeam()?->getName()][1] !== null) {
+								$this->processCallBack("GeneratorsTnt", $player->getTeam()?->getName());
+							}
+							break;
+							case "Base4":
+								$player->setAbsorption($player->getAbsorption() + (float)$properties["Base4"][$player->getTeam()->getName()][0]);
+								foreach ($this->getWorld()->getPlayers() as $p) {
+									$p->sendMessage($player->getName() . "a explosé un lit et octroie un bonus de " . (float)$properties["Base7"][$player->getTeam()->getName()][0] . " ❤ à son équipe");
+
+								}
+								if ($properties["Base4"][$player->getTeam()?->getName()][1] !== null) {
+									$this->processCallBack("GeneratorsTnt", $player->getTeam()?->getName());
+								}
+								break;
+							case "Base5":
+								$player->setAbsorption($player->getAbsorption() + (float)$properties["Base5"][$player->getTeam()->getName()][0]);
+								foreach ($this->getWorld()->getPlayers() as $p) {
+									$p->sendMessage($player->getName() . "a explosé un lit et octroie un bonus de " . (float)$properties["Base7"][$player->getTeam()->getName()][0] . " ❤ à son équipe");
+								}
+								if ($properties["Base5"][$player->getTeam()?->getName()][1] !== null) {
+									$this->processCallBack("GeneratorsTnt", $player->getTeam()?->getName());
+								}
+								break;
+								case "Base6":
+									$player->setAbsorption($player->getAbsorption() + (float)$properties["Base6"][$player->getTeam()->getName()][0]);
+									foreach ($this->getWorld()->getPlayers() as $p) {
+										$p->sendMessage($player->getName() . "a explosé un lit et octroie un bonus de " . (float)$properties["Base7"][$player->getTeam()->getName()][0] . " ❤ à son équipe");
+									}
+									if ($properties["Base6"][$player->getTeam()?->getName()][1] !== null) {
+										$this->processCallBack("GeneratorsTnt", $player->getTeam()?->getName());
+									}
+									break;
+								case "Base7":
+									$player->setAbsorption($player->getAbsorption() + (float)$properties["Base7"][$player->getTeam()->getName()][0]);
+									foreach ($this->getWorld()->getPlayers() as $p) {
+										$p->sendMessage($player->getName() . "a explosé un lit et octroie un bonus de " . (float)$properties["Base7"][$player->getTeam()->getName()][0] . " ❤ à son équipe");
+									}
+									if ($properties["Base7"][$player->getTeam()->getName()][1] !== null) {
+										$this->processCallBack("GeneratorsTnt", $player->getTeam()->getName());
+									}
+									break;
+								default:
+									foreach ($event->getBlockList() as $blockList) {
+										if (!in_array($block, $this->forbiddenBlock)) continue;
+										$event->setBlockList(array_diff([$blockList], $this->forbiddenBlock));
+									}
+									foreach ($event->getBlockList() as $blockList) {
+										if ($blockList instanceof Bed) {
+											if (in_array($block->getPosition(), $properties[$player->getTeam()->getName()])) {
+												$event->setBlockList(array_diff([$blockList], $this->forbiddenBlock));
+												$player->sendMessage("§cVous ne pouvez pas casser le lit de votre équipe");
+											} else {
+												$this->processCallBack("TeamBedExplode", $player, $block);
+											}
+										}
+									}
+									break;
+					}
+				}
+			}
+		});
+	$this->addCallback(ListenerUtils::BLOCK_BREAK, function (BlockBreakEvent $event) {
+		$block = $event->getBlock();
+		if (in_array($block, $this->forbiddenBlock)) {
+			$event->cancel();
+		}
+	});
+
+	$this->addCallback("GeneratorsTnt", function (string $team) {
+		$this->processCallBack("ItemGenerator", VanillaBlocks::TNT()->asItem(), $this->properties->getPropertiesList()["GameInfo"]["GeneratorsTnt"][$team], 20 * 60, true);
+	});
+
+	$this->addCallback("ItemGenerator", function (Item $item, array $vectors, int $tick, bool $spawnWhenCalled = false) {
+		if ($spawnWhenCalled) {
+			foreach ($vectors as $vector3) {
+				if (!$vector3 instanceof Vector3) continue;
+				$this->getWorld()->dropItem($vector3, $item, new Vector3(0, 0.2, 0));
+			}
+		}
+		Polaris::getInstance()->getScheduler()->scheduleRepeatingTask(new ClosureTask(function () use ($item, $vectors) {
+			foreach ($vectors as $vector3) {
+				if (!$vector3 instanceof Vector3) continue;
+				$this->getWorld()->dropItem($vector3, $item, new Vector3(0, 0.2, 0));
+			}
+		}), $tick);
+	});
+
+	$this->addCallback("LoadPlayer", function (PolarisPlayer $player) {
+		$player->setHealth(20);
+		$this->sendScoreboard($player);
+		$player->setAbsorption($this->properties->getProperties("GameInfo")["TeamAbsorption"][$player->getTeam()?->getName()] ? null : 0);
+		$pos = $this->properties->getProperties("GameInfo")["TeamPosition"][$player->getTeam()?->getName()];
+		$this->getWorld()->loadChunk($pos->x, $pos->z);
+		$player->teleport(Location::fromObject($pos, $this->getWorld()));
+		$sword = VanillaItems::IRON_SWORD();
+
+
+		/** @var Armor[] $armors */
+		$armors = [ //TODO: check enchantment
+			VanillaItems::LEATHER_CAP(),
+			VanillaItems::LEATHER_TUNIC(),
+			VanillaItems::LEATHER_PANTS(),
+			VanillaItems::LEATHER_BOOTS()
+		];
+
+		//TODO: atout (genre 16 blocks dès le départ)
+		$flint = VanillaItems::FLINT_AND_STEEL();
+		$player->getInventory()->setItem(0, $sword);
+		$player->getInventory()->setItem(1, $flint);
+		switch ($player->getTeam()->getName()) {
+			case "Red":
+				$player->getArmorInventory()->setHelmet($armors[0]->setCustomColor(new Color(0xb0, 0x2e, 0x26)));
+				$player->getArmorInventory()->setChestplate($armors[1]->setCustomColor(new Color(0xb0, 0x2e, 0x26)));
+				$player->getArmorInventory()->setLeggings($armors[2]->setCustomColor(new Color(0xb0, 0x2e, 0x26)));
+				$player->getArmorInventory()->setBoots($armors[3]->setCustomColor(new Color(0xb0, 0x2e, 0x26)));
+				break;
+			case "Blue":
+				$player->getArmorInventory()->setHelmet($armors[0]->setCustomColor(new Color(0x3c, 0x44, 0xaa)));
+				$player->getArmorInventory()->setChestplate($armors[1]->setCustomColor(new Color(0x3c, 0x44, 0xaa)));
+				$player->getArmorInventory()->setLeggings($armors[2]->setCustomColor(new Color(0x3c, 0x44, 0xaa)));
+				$player->getArmorInventory()->setBoots($armors[3]->setCustomColor(new Color(0x3c, 0x44, 0xaa)));
+				break;
+		}
+
+		$delay = 5;
+		Polaris::getInstance()->getScheduler()->scheduleDelayedTask(new ClosureTask(function () use ($player, $sword, $delay): void {
+			if ($delay <= 0) {
+				if ($player?->getInventory()->contains($sword)) {
+					$player->getInventory()->removeItem($sword);
+					$player->getInventory()->addItem($sword->addEnchantment(new EnchantmentInstance(VanillaEnchantments::SHARPNESS(), 2)));
+				}
+				throw new CancelTaskException();
+			}
+			$delay--;
+		}), 5 * 20);
+	});
+
+	$this->addCallback("TeamBedExplode", function (PolarisPlayer $player, Bed $block) {
+		switch ($player->getTeam()->getName()) {
+			case "Red":
+				if (in_array($block, $this->properties->getProperties("GameInfo")["BedPosition"]["Blue"], $block) or in_array($block, $this->properties->getProperties("GameInfo")["BedPosition"]["Blue"], $block->getOtherHalf())) {
+					$this->properties->setNestedProperties("GameInfo.BedAlive.Blue", false);
+					//TODO: scoreboard
+					foreach ($this->getWorld()->getPlayers() as $p) {
+						if (!$p instanceof PolarisPlayer) return;
+						$p->sendMessage($player->getName() . " a explosé le lit de l'équipe Bleu");
+						$this->sendScoreboard($p);
+					}
+					foreach ($this->players as $p) {
+						if ($p->getTeam()->getName() === "Blue") {
+							$p->sendMessage("Votre lit d'équipe vient d'être détruit, vous ne réapparaîtrez plus");
+						}
+					}
+				}
+				break;
+			case "Blue":
+				if (in_array($block, $this->properties->getProperties("GameInfo")["BedPosition"]["Red"], $block) or in_array($block, $this->properties->getProperties("GameInfo")["BedPosition"]["Red"], $block->getOtherHalf())) {
+					$this->properties->setNestedProperties("GameInfo.BedAlive.Red", false);
+					foreach ($this->getWorld()->getPlayers() as $p) {
+						if (!$p instanceof PolarisPlayer) return;
+						$p->sendMessage($player->getName() . " a explosé le lit de l'équipe Bleu");
+						$this->sendScoreboard($p);
+					}
+					foreach ($this->players as $p) {
+						if ($p->getTeam()->getName() === "Red") {
+							$p->sendMessage("Votre lit d'équipe vient d'être détruit, vous ne réapparaîtrez plus");
+						}
+					}
+				}
+				break;
+		}
+	});
+
+	$this->addCallback("kill", function (PolarisPlayer $victim, ?PolarisPlayer $killer = null, ?int $cause = null) {
+		//TODO: add $killer kill $point + $victim death
+		//Todo: check if block position is dead
+		if ($killer != null) {
+			$this->properties->setNestedProperties("GameInfo.Players." . $killer->getUniqueId()->toString() . ".kill",
+				(int)$this->properties->getProperties("GameInfo")["Players"][$killer->getUniqueId()->toString()]["kill"] + 1);
+			$this->sendScoreboard($killer);
+			$victim->sendMessage("$killer vous a tuez");
+			$killer->sendMessage("Vous avez tuez $victim");
+		} else {
+			switch ($cause) {
+				case EntityDamageEvent::CAUSE_SUFFOCATION:
+					foreach ($this->getWorld()->getPlayers() as $p) {
+						$p->sendMessage("La maman à $victim ne lui a pas appris à respirer au bon moment");
+					}
+					break;
+				case EntityDamageEvent::CAUSE_FALL:
+					foreach ($this->getWorld()->getPlayers() as $p) {
+						$p->sendMessage("$victim s'est pris pour Spider-Man");
+					}
+					break;
+				case EntityDamageEvent::CAUSE_VOID:
+					foreach ($this->getWorld()->getPlayers() as $p) {
+						$p->sendMessage("$victim n'a pas regardé où il marchait Soit plus prudent la prochaine fois :)");
+					}
+					break;
+				case EntityDamageEvent::CAUSE_ENTITY_EXPLOSION:
+					foreach ($this->getWorld()->getPlayers() as $p) {
+						$p->sendMessage("$victim s'est pris un 14 juillet dans la tête");
+					}
+					break;
+				case null;
+					foreach ($this->getWorld()->getPlayers() as $p) {
+						$p->sendMessage("$killer a tué $victim");
+					}
+					break;
+			}
+		}
+
+		$this->properties->setNestedProperties("GameInfo.Players." . $victim->getUniqueId()->toString() . ".kill",
+			(int)$this->properties->getProperties("GameInfo")["Players"][$victim->getUniqueId()->toString()]["kill"] + 1);
+
+		$this->sendScoreboard($victim);
+
+		if ($this->properties->getProperties("GameInfo")["BedAlive"][$victim->getTeam()->getName()]) {
+			$this->processCallback("LoadPlayer", $victim);
+
+			Polaris::getInstance()->getScheduler()->scheduleRepeatingTask(new CooldownTask(5,
+				function (PolarisPlayer $victim) {
+					$victim->sendMessage("§l§b[§a{$this->getName()}§b] §akill dans §e{time} §asecondes");
+					$this->processCallback("LoadPlayer", $victim);
+				}, $victim
+			), 20);
+
+		} else {
+			$this->deadPlayers[$victim->getUniqueId()->toString()] = $victim;
+			$victim->sendTitle("§cMort");
+			$victim->sendSubTitle("§cVous ne pouvez plus réapparaître");
+			$victim->setGamemode(GameMode::SPECTATOR());
+			$victim->isAbleToBeAViewerSpectator = true;
+		}
+
+		$this->processCallBack("initGame");
+	});
+
+	$this->addCallback("initGame", function () {
+		foreach ($this->getTeams() as $team) {
+			if (count($team->getPlayers()) === 0) {
+				foreach ($team->getPlayers() as $player) {
+					$player->sendTitle("§aPerdu !", "Votre équipe a perdu.", -1, 20, 20 * 2);
+				}
+				foreach ($this->players as $player) {
+					if ($player->getTeam()?->getName() !== $team->getName()) {
+						$player->sendTitle("§6Victoire !", "Votre équipe a gagné !", -1, 20, 20 * 2);
+					}
+				}
+				$this->onStop();
+				return;
+			}
+		}
+	});
+
+	$this->addCallback("end", function () {
+		!Server::getInstance()->getWorldManager()->isWorldLoaded($this->world->getFolderName()) || Server::getInstance()->getWorldManager()->unloadWorld($this->world);
+		Filesystem::recursiveUnlink(GameUtils::getRushWorldDir() . $this->world->getFolderName());
+		Polaris::getInstance()->getLogger()->notice("[RUSH] Disabling Rush " . $this->world->getFolderName());
+		var_dump($this->world->isLoaded());
+
+		//TODO: give xp, + 1 win data, tp lobby, reset inventory, reset team, reset gamemode, reset inGame
+	});
+}
+
+	public function onStop(): void
+	{
+		$this->properties->setProperties("running", false);
+		$this->properties->setProperties("ending", true);
+		$this->processCallback("end");
+		var_dump($this->count);
+		GameLoader::getInstance()->removeGame($this);
+	}
 }

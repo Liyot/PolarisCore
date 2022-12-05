@@ -29,6 +29,11 @@ class GameUtils{
         return Server::getInstance()->getWorldManager()->getWorldByName('PolarisSpawn');
     }
 
+	final public static function getRushWorldDir(): string
+	{
+		return Server::getInstance()->getDataPath()."worlds\\";
+	}
+
 	public static function getSpawnPosition(): Position
 	{
 		return new Position(-57, 60, -68, Server::getInstance()->getWorldManager()->getWorldByName("PolarisSpawn"));

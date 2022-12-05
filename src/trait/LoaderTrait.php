@@ -36,6 +36,7 @@ use Polaris\games\GameLoader;
 use Polaris\games\types\RushGame;
 use Polaris\item\ItemManager;
 use Polaris\item\Specialitem;
+use Polaris\listener\EntityListener;
 use Polaris\listener\PacketListener;
 use Polaris\listener\PlayerListener;
 use Polaris\player\PolarisPlayer;
@@ -104,6 +105,7 @@ trait LoaderTrait{
     public function loadEvents(): void
     {
         $this->getServer()->getPluginManager()->registerEvents(new PacketListener(), $this);
+		$this->getServer()->getPluginManager()->registerEvents(new EntityListener(), $this);
         $this->getServer()->getPluginManager()->registerEvents(new PlayerListener(), $this);
         $this->getServer()->getPluginManager()->registerEvents(new GameListener(), $this);
     }

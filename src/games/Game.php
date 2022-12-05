@@ -19,9 +19,11 @@ abstract class Game implements GameInterface{
      */
     public array $players = [];
 
+	public int $count = 0;
+
     private float $lastTick = 0;
 
-    public WaitingLobby $lobby;
+    public ?WaitingLobby $lobby = null;
 
     public GameProperties $properties;
 
@@ -63,10 +65,11 @@ abstract class Game implements GameInterface{
     }
 
 
-    public function getLobby(): WaitingLobby
+    public function getLobby(): ?WaitingLobby
     {
         return $this->lobby;
     }
+
     public function preJoin(PolarisPlayer $player): void{
         if($player->canJoin($this) && count($this->getPlayers()) < $this->getMaxPlayers()){
             $this->lobby->join($player);
@@ -81,6 +84,7 @@ abstract class Game implements GameInterface{
 
 
     public function leave(PolarisPlayer $player): void{
+		$this->getLobby()?->leave($player);
         if(isset($this->players[$player->getUniqueId()->toString()])){
 			unset($this->players[$player->getUniqueId()->toString()]);
             $player->inGame = false;

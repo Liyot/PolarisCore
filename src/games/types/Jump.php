@@ -39,6 +39,7 @@ final class Jump extends TimedGames implements MinorGameInterface {
 
 	public function leave(PolarisPlayer $player): void
 	{
+		if(str_contains($this->getSpawn()->getWorld()->getFolderName(), "PolarisSpawn")) $player->teleportToSpawn();
 		parent::leave($player);
 	}
 

@@ -34,8 +34,6 @@ class GameLoader{
 	 */
 	private array $lobbyCount = [];
 
-    public array $lobby = [];
-
     /**
      * @var PolarisPlayer[]
      */
@@ -103,9 +101,10 @@ class GameLoader{
 
 	/**
 	 * @param string $name
-	 * @return Game
+	 * @return ?Game
 	 */
-    public function getDisponibleGame(string $name): Game{
+    public function getDisponibleGame(string $name): ?Game{
+		var_dump(array_keys(self::$game));
         foreach (self::$game as $game){
             if($game instanceof RoundedGames && str_contains($game->getName(), $name)){
                 if($game->properties->getProperties("Starting") && $game->Joinable()){
@@ -114,9 +113,7 @@ class GameLoader{
                 if($game->getQueue() < $game->getMaxPlayers()){
                     return $game;
                 }
-            }else{
-                return self::getGame($name, 1);
-            }
+            } return null;
         }
         return $this->getDisponibleGame($name);
     }
@@ -129,6 +126,7 @@ class GameLoader{
     {
         $name = strtolower($game->getName());
         $this->addCount($game);
+		$game->count = $this->getGameCount($game);
         $game instanceof MinorGameInterface ?: $this->lobbyCount[] = $game->getLobby();
         Server::getInstance()->getLogger()->notice(TextFormat::DARK_AQUA."[GAME] §aAdding game: " . $game->getName()."-". $this->gameCount[$name]);
         self::$game[$name."-".$this->gameCount[$name]] = $game;
@@ -166,8 +164,8 @@ class GameLoader{
 	 */
     public function removeGame(Game $game): void{
         $name = strtolower($game->getName());
-        Server::getInstance()->getLogger()->notice(TextFormat::DARK_AQUA."[GAME] §a Removing game: " . $game->getName()."-". $this->gameCount[$name]);
-        unset(self::$game[$game->getName()."-".$this->gameCount[strtolower($game->getName())]]);
+        Server::getInstance()->getLogger()->notice(TextFormat::DARK_AQUA."[GAME] §a Removing game: " . $game->getName()."-". $game->count);
+        unset(self::$game[strtolower($game->getName())."-".$game->count]);
         $this->gameCount[$name]--;
 
     }

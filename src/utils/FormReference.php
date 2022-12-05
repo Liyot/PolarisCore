@@ -14,6 +14,7 @@ abstract class FormReference{
         $form = MenuForm::withOptions("Mode de jeux", "", GameUtils::GameName,  function (PolarisPlayer $player, Button $selected){
             $name = strtolower($selected->text);
             $game = GameLoader::getInstance()->getDisponibleGame(str_replace(' ',  '', $name));
+			var_dump($game->count);
             $game->preJoin($player);
         });
         return $form;

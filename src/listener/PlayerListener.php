@@ -58,6 +58,7 @@ class PlayerListener implements Listener
     {
         $player = $event->getPlayer();
         if (!$player instanceof PolarisPlayer) return;
+		$player->getActualGame()?->leave($player);
         if ($player->currentViewerPlayer !== null) {
             $player->currentViewerPlayer->removeViewer($player);
             $player->teleportToSpawn();

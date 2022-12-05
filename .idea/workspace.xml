@@ -10,8 +10,12 @@
       <change beforePath="$PROJECT_DIR$/src/games/GameLoader.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/GameLoader.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/games/lobby/WaitingLobby.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/lobby/WaitingLobby.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/games/types/Jump.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/types/Jump.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/games/types/TimedGames.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/types/TimedGames.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/games/types/RushGame.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/games/types/RushGame.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/listener/EntityListener.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/listener/EntityListener.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/listener/PlayerListener.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/listener/PlayerListener.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/trait/LoaderTrait.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/trait/LoaderTrait.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/FormReference.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/FormReference.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/GameUtils.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/GameUtils.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
